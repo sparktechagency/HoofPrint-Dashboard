@@ -9,17 +9,17 @@ function Profile({ setActiveTab }) {
   });
   return (
     <div >
-      <p className="mb-5 text-2xl font-bold text-center text-white">
+      <p className="mb-5 text-2xl font-bold text-center ">
         Your Profile
       </p>
       <form className="space-y-2 w-auto md:w-[480px]">
         <div>
-          <label className="mb-2 text-xl font-bold text-white">User Name</label>
+          <label className="mb-2 text-xl font-bold ">User Name</label>
           <input
             type="text"
             name="fullName"
             value={userData.name}
-            className="w-full px-5 py-3 mt-5  border-2 border-black  rounded-md outline-none placeholder:text-xl"
+            className="w-full px-5 py-3 mt-5 border-2 border-black rounded-md outline-none placeholder:text-xl"
             placeholder="Enter full name"
             disabled
           />
@@ -30,7 +30,7 @@ function Profile({ setActiveTab }) {
             type="email"
             name="contactNo"
             value={userData.email}
-            className="w-full px-5 py-3 mt-5 border-2 border-black  rounded-md outline-none placeholder:text-xl"
+            className="w-full px-5 py-3 mt-5 border-2 border-black rounded-md outline-none placeholder:text-xl"
             placeholder="Enter Email"
             disabled
           />
@@ -43,7 +43,7 @@ function Profile({ setActiveTab }) {
             type="number"
             name="location"
             value={userData.number}
-            className="w-full px-5 py-3 mt-5  border-2 border-black rounded-md outline-none placeholder:text-xl"
+            className="w-full px-5 py-3 mt-5 border-2 border-black rounded-md outline-none placeholder:text-xl"
             placeholder="Contact No"
             disabled
           />
@@ -54,7 +54,7 @@ function Profile({ setActiveTab }) {
             type="text"
             name="location"
             value={userData.address}
-            className="w-full px-5 py-3 mt-5   border-2 border-black rounded-md outline-none placeholder:text-xl"
+            className="w-full px-5 py-3 mt-5 border-2 border-black rounded-md outline-none placeholder:text-xl"
             placeholder="Enter Address"
             disabled
           />

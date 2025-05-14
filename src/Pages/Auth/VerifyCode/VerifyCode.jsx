@@ -37,17 +37,17 @@ const VerifyCode = () => {
   const handleVerify = (e) => {
     e.preventDefault();
     const verificationCode = code.join("");
-    navigate('/new-password')
+    navigate('/update-password')
     alert(`Verifying code: ${verificationCode}`);
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div  className="py-10 md:py-28 mx-2 md:mx-0 px-6 md:px-10 rounded-2xl w-[580px] h-[525px] bg-[#79DEF8] bg-opacity-25 border-2 border-[#eef6ff] mt-10">
+      <div  className="py-10 md:py-28 mx-2 md:mx-0 px-6 md:px-10 rounded-2xl w-[580px] h-[525px] shadow-lg bg-opacity-25 border-2 border-[#eef6ff] mt-10">
         <div className="text-center">
           <h1 className="text-2xl font-medium text-gray-600">Check your email</h1>
           <p className="mt-4 text-gray-500">
-            We sent a reset link to <span className="font-medium text-gray-700">naoue@gmail.com</span>
+            We sent a reset link to <span className="font-medium text-gray-700">mehedi@gmail.com</span>
           </p>
           <p className="text-gray-500">Enter the 5-digit code mentioned in the email</p>
 
@@ -71,7 +71,7 @@ const VerifyCode = () => {
 
             <button
               type="submit"
-              className="w-full py-3 mt-8 text-white transition-colors rounded-full bg-[#52B5D1] hover:bg-[#418fa5] focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2"
+              className=" p-3 mt-8 text-white transition-colors rounded-lg bg-[#101749]  focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2"
             >
               Verify Code
             </button>

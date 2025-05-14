@@ -17,8 +17,8 @@ const ForgatePassword = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div  className="py-10 md:py-28 mx-2 md:mx-0 px-6 md:px-10 rounded-2xl w-[580px] h-[525px] bg-[#79DEF8] bg-opacity-25 border-2 border-[#eef6ff] mt-10">
+        <div className="flex items-center justify-center min-h-screen ">
+            <div  className="py-10 md:py-28 mx-2 md:mx-0 px-6 md:px-10 rounded-2xl w-[580px] h-[525px]  bg-opacity-25 border-2 border-[#eef6ff] mt-10">
                 <h2 className="mb-6 text-2xl font-bold text-center">Forgot Password</h2>
                 <p className="mb-8 text-center text-gray-600">
                     Enter your email address to receive password reset instructions
@@ -47,7 +47,7 @@ const ForgatePassword = () => {
                        <div className='text-center'>
                        <button
                             type="submit"
-                            className=" bg-[#52B5D1] text-white p-2 rounded-lg"
+                            className=" bg-[#101749] text-white p-2 rounded-lg"
                             disabled={loading}
                         >
                             {loading ? 'Sending...' : 'Send Code'}

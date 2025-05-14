@@ -32,6 +32,8 @@ const PrivacyPolicy = () => {
             onBlur={(newContent) => setContent(newContent)} // preferred to use only this option to update the content for performance reasons
             onChange={(newContent) => {}}
           />
+                    <button className="w-full bg-[#101749] p-2 text-white mt-2 rounded-lg">Save</button>
+
         </div>
       </div>
     </div>

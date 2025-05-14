@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { AiOutlineSetting } from "react-icons/ai";
 import { FiUser, FiLogOut } from "react-icons/fi";
 import { BiChevronDown } from "react-icons/bi";
 import { Link } from "react-router-dom";
-import { MdDashboard, MdPrivacyTip } from "react-icons/md";
-import { FaEdit } from "react-icons/fa";
-import { RiMoneyDollarCircleLine, RiTerminalWindowLine } from "react-icons/ri";
-import brandlogo from "../../assets/image/moving-logo.png";
+import { MdDashboard, MdOutlineShoppingCart, MdPrivacyTip } from "react-icons/md";
+import { FaEdit, FaRegUser } from "react-icons/fa";
+import { RiTerminalWindowLine } from "react-icons/ri";
 import { PiUsers } from "react-icons/pi";
-import { IoNewspaper } from "react-icons/io5";
 import { GrUserSettings } from "react-icons/gr";
-import { CiUser } from "react-icons/ci";
+import { CiSettings, CiUser } from "react-icons/ci";
+import { BsArrowLeftRight } from "react-icons/bs";
 
 
 const Sidebar = ({ closeDrawer }) => {
@@ -25,23 +23,25 @@ const Sidebar = ({ closeDrawer }) => {
       Link: "/",
     },
     {
-      icon: <PiUsers  className="w-5 h-5" />,
-      label: "User Management",
+      icon: <FaRegUser  className="w-5 h-5" />,
+
+      label: "User Details",
       Link: "/user-management",
     },
         {
-      icon: <PiUsers  className="w-5 h-5" />,
+      icon: <BsArrowLeftRight  className="w-5 h-5" />,
       label: "Transection History",
       Link: "/transection-history",
     },
             {
-      icon: <PiUsers  className="w-5 h-5" />,
+      icon: <MdOutlineShoppingCart className="w-5 h-5" />,
       label: "All Products",
       Link: "/all-products",
     },
     {
-      icon: <GrUserSettings  className="w-5 h-5" />,
+      icon: <CiSettings className="w-5 h-5" />,
       label: "Settings",
+      Link: "/settings/profile",
       isDropdown: true,
       subItems: [
         {
@@ -59,11 +59,6 @@ const Sidebar = ({ closeDrawer }) => {
           icon: <RiTerminalWindowLine className="w-5 h-5" />,
           label: "Terms & Conditions",
           Link: "/settings/terms-condition",
-        },
-        {
-          icon: <CiUser className="w-5 h-5" />,
-          label: "edit-profile",
-          Link: "/profile",
         },
       ],
     },
@@ -83,7 +78,6 @@ const Sidebar = ({ closeDrawer }) => {
           return true;
         }
       }
-
       // Filter the label of the item
       return item.label.toLowerCase().includes(searchTerm.toLowerCase());
     });
@@ -102,7 +96,7 @@ const Sidebar = ({ closeDrawer }) => {
         {filteredItems.map((item) => (
           <div key={item.label}>
             <div
-              className={`flex justify-between  items-center px-5 py-2 my-5 cursor-pointer transition-all rounded-lg ${
+              className={`flex justify-between  items-center px-5 py-2 my-5 cursor-pointer transition-all rounded-l-full ${
                 active === item.label
                   ? "bg-[#101749] text-white font-semibold"
                   : "text-[#101749]"
@@ -132,7 +126,7 @@ const Sidebar = ({ closeDrawer }) => {
                 {item.subItems.map((subItem) => (
                   <Link to={subItem.Link} key={subItem.label}>
                     <div
-                      className={`py-2 px-5 cursor-pointer my-5 transition-all rounded-lg ${
+                      className={`py-2 px-5 cursor-pointer my-5 transition-all rounded-l-full ${
                         active === subItem.label
                           ? "bg-[#101749] text-white font-semibold"
                           : "text-[#101749]"
@@ -151,7 +145,7 @@ const Sidebar = ({ closeDrawer }) => {
         ))}
       </div>
       <Link to="/sign-in">
-        <div className="bg-[#101749] text-white w-full py-3 flex justify-center items-center cursor-pointer rounded-lg mt-4">
+        <div className="flex items-center justify-center w-full py-3 mt-4 rounded-lg cursor-pointer ">
           <FiLogOut className="text-xl" />
           <p className="ml-2">Log out</p>
         </div>

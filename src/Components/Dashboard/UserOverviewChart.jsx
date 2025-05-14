@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { Chart, registerables } from 'chart.js';
+import React, { useEffect, useRef } from "react";
+import { Chart, registerables } from "chart.js";
 
 Chart.register(...registerables);
 
@@ -16,19 +16,40 @@ function UserOverviewChart() {
       chartInstance.current.destroy();
     }
 
-    const ctx = chartRef.current.getContext('2d');
+    const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
-
     // Sample data that mimics the chart in the image
     const data = {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'],
+      labels: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sept",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
       datasets: [
         {
-          label: 'Users',
+          label: "Users",
           data: [85, 80, 75, 65, 40, 45, 60, 75, 95, 85, 90, 75],
           fill: true,
-          backgroundColor: '#101749',
-          borderColor: '#101749',
+          backgroundColor: function (context) {
+            const chart = context.chart;
+            const ctx = chart.ctx;
+            const gradient = ctx.createLinearGradient(0, 0, 0, chart.height);
+            gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+            gradient.addColorStop(0.8, "rgba(16, 23, 73, 1)"); 
+            gradient.addColorStop(1, "rgba(16, 23, 73, 1)");
+
+            return gradient;
+          },
+          // borderColor: "#101749",
           tension: 0.4,
           pointRadius: 0,
         },
@@ -36,7 +57,7 @@ function UserOverviewChart() {
     };
 
     chartInstance.current = new Chart(ctx, {
-      type: 'line',
+      type: "line",
       data: data,
       options: {
         responsive: true,
@@ -46,12 +67,12 @@ function UserOverviewChart() {
             display: false,
           },
           tooltip: {
-            mode: 'index',
+            mode: "index",
             intersect: false,
-            backgroundColor: '#101749',
-            titleColor: '#101749',
-            bodyColor: '#101749',
-            borderColor: '#101749',
+            backgroundColor: "#101749",
+            titleColor: "#fffdff",
+            bodyColor: "#fffdff",
+            borderColor: "#fffdff",
             borderWidth: 1,
           },
         },
@@ -60,10 +81,10 @@ function UserOverviewChart() {
             beginAtZero: true,
             max: 100,
             grid: {
-              color: 'rgba(255, 255, 255, 0.1)',
+              color: "rgba(255, 255, 255, 0.1)",
             },
             ticks: {
-              color: '#101749',
+              color: "#101749",
               font: {
                 size: 12,
               },
@@ -75,7 +96,7 @@ function UserOverviewChart() {
               display: false,
             },
             ticks: {
-              color: '#101749',
+              color: "#101749",
               font: {
                 size: 12,
               },
@@ -102,33 +123,37 @@ function UserOverviewChart() {
 // Main Dashboard Component
 function DashboardPage() {
   return (
-    <div className="container mx-auto p-4">
+    <div className="container p-4 mx-auto">
       <div className="max-w-5xl mx-auto">
-       
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-black text-2xl font-medium">Total User Overview</h2>
-            <div className="flex items-center gap-6">
-              <span className="text-black">Monthly Growth</span>
-                <span className="text-black font-bold"> 35.80 %</span>
-              <div className="relative">
-                <select
-                  className="appearance-none text-black px-4 py-1 pr-8 rounded-md border border-black focus:outline-none"
-                  defaultValue="2024"
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-medium text-black">
+            Total User Overview
+          </h2>
+          <div className="flex items-center gap-6">
+            <span className="text-black">Monthly Growth</span>
+            <span className="font-bold text-black"> 35.80 %</span>
+            <div className="relative">
+              <select
+                className="px-4 py-1 pr-8 text-black border border-black rounded-md appearance-none focus:outline-none"
+                defaultValue="2024"
+              >
+                <option>2024</option>
+                <option>2023</option>
+                <option>2022</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 text-white pointer-events-none">
+                <svg
+                  className="w-4 h-4 fill-current"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
                 >
-                  <option>2024</option>
-                  <option>2023</option>
-                  <option>2022</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
-                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                  </svg>
-                </div>
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                </svg>
               </div>
             </div>
           </div>
-          <UserOverviewChart />
-      
+        </div>
+        <UserOverviewChart />
       </div>
     </div>
   );

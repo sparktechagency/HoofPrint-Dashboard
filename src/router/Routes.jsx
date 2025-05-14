@@ -9,17 +9,15 @@ import PrivateRoute from "./PrivateRoute";
 import Dashboard from "../Pages/Dashboard/Dashboard";
 import UserManagement from "../Pages/UserManagement/UserManagement";
 import ProfilePage from "../Pages/AdminProfile/ProfilePage";
-import UserRequest from "../Pages/UserRequest/UserRequest";
-import Earnings from "../Pages/Earnings/Earnings";
 import VerifyCode from "../Pages/Auth/VerifyCode/VerifyCode";
-import NewPass from "../Pages/Auth/NewPass/NewPass";
 import TransectionHistory from "../Pages/TransectionHistory/TransectionHistory";
 import AllProduct from "../Pages/AllProduct/AllProduct";
+import UpdatePassword from "../Pages/Auth/UpdatePassword/UpdatePassword";
 
 export const router = createBrowserRouter([
   {
     path: "/sign-in",
-    element: <SignIn></SignIn>,
+    element: <SignIn/>,
   },
   {
     path: "/forgate-password",
@@ -29,10 +27,9 @@ export const router = createBrowserRouter([
     path: "/verify-code",
     element: <VerifyCode/>,
   },
-
-  {
-    path: "/new-password",
-    element: <NewPass/>,
+    {
+    path: "/update-password",
+    element: <UpdatePassword/>,
   },
   {
     element: <PrivateRoute />,
@@ -74,7 +71,7 @@ export const router = createBrowserRouter([
             element: <TermsCondition />,
           },
           {
-            path: "/profile",
+            path: "/settings/profile",
             element: <ProfilePage/>,
           },
   

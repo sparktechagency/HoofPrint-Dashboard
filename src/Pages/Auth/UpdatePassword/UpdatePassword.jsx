@@ -4,7 +4,7 @@ import { FaRegEye } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-const NewPass = () => {
+const UpdatePassword = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -43,11 +43,11 @@ const NewPass = () => {
             initialValues={{ remember: true }}
             onFinish={onFinish}
             layout="vertical"
-            className="py-10 md:py-20 px-6 md:px-10 rounded-2xl w-full max-w-lg bg-[#79DEF8]/25 border-2 border-[#eef6ff] mt-10"
+            className="py-10 md:py-20 px-6 md:px-10 rounded-2xl w-full max-w-lg shadow-lg border-2 border-[#eef6ff] mt-10"
           >
             <div className="mb-6 text-center">
               <h2 className="mb-4 text-2xl font-bold text-gray-700 md:text-3xl">
-                Create New Password
+                Set New Password
               </h2>
               <Typography.Text className="text-base text-gray-600">
               Create a new password. Ensure it differs from
@@ -97,7 +97,7 @@ const NewPass = () => {
 
             <Form.Item className="mt-8 text-center">
               <button
-                className="bg-[#52B5D1] text-center p-2 font-semibold text-white px-10 py-2 rounded-md transition hover:bg-[#3aa2bf]"
+                className="bg-[#101749] text-center p-2 font-semibold text-white px-10 py-2 rounded-md transition "
                 type="submit"
                 disabled={loading}
               >
@@ -111,4 +111,5 @@ const NewPass = () => {
   );
 };
 
-export default NewPass;
+export default UpdatePassword;
+

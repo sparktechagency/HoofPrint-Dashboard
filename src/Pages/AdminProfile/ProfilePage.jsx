@@ -77,7 +77,7 @@ function ProfilePage() {
               <p
                 onClick={() => setActiveTab("profile")}
                 className={`cursor-pointer pb-1  ${
-                  activeTab === "profile" ? " border-b-2 " : "text-[#101749]"
+                  activeTab === "profile" ? " border-b-2 border-[#101749] " : "text-[#101749]"
                 }`}
               >
                 Profile

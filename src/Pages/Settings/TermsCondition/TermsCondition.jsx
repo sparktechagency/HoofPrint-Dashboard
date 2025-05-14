@@ -17,8 +17,8 @@ const TermsCondition = () => {
 
   return (
     <div className="container mx-auto">
-      <div className="bg-white rounded-lg p-6 md:p-10 mt-5">
-        <h2 className="text-2xl font-bold mb-6">About Us</h2>
+      <div className="p-6 mt-5 bg-white rounded-lg md:p-10">
+        <h2 className="mb-6 text-2xl font-bold">About Us</h2>
         <div>
           <JoditEditor
             ref={editor}
@@ -28,6 +28,8 @@ const TermsCondition = () => {
             onBlur={(newContent) => setContent(newContent)} // preferred to use only this option to update the content for performance reasons
             onChange={(newContent) => {}}
           />
+                    <button className="w-full bg-[#101749] p-2 text-white mt-2 rounded-lg">Save</button>
+
         </div>
       </div>
     </div>
