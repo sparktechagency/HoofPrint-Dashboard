@@ -13,23 +13,26 @@ import VerifyCode from "../Pages/Auth/VerifyCode/VerifyCode";
 import TransectionHistory from "../Pages/TransectionHistory/TransectionHistory";
 import AllProduct from "../Pages/AllProduct/AllProduct";
 import UpdatePassword from "../Pages/Auth/UpdatePassword/UpdatePassword";
+import ProductList from "../Pages/AllProduct/ProductDetail";
+import AllProducts from "../Pages/AllProduct/AllProduct";
+import ProductDetail from "../Pages/AllProduct/ProductDetail";
 
 export const router = createBrowserRouter([
   {
     path: "/sign-in",
-    element: <SignIn/>,
+    element: <SignIn />,
   },
   {
     path: "/forgate-password",
-    element: <ForgatePassword/>,
+    element: <ForgatePassword />,
   },
   {
     path: "/verify-code",
-    element: <VerifyCode/>,
+    element: <VerifyCode />,
   },
-    {
+  {
     path: "/update-password",
-    element: <UpdatePassword/>,
+    element: <UpdatePassword />,
   },
   {
     element: <PrivateRoute />,
@@ -50,13 +53,17 @@ export const router = createBrowserRouter([
             path: "/user-management",
             element: <UserManagement />,
           },
-           {
+          {
             path: "/transection-history",
-            element: <TransectionHistory/>,
+            element: <TransectionHistory />,
           },
-            {
+          {
             path: "/all-products",
             element: <AllProduct/>,
+          },
+          {
+            path: "/product-detail/:categoryId",
+            element: <ProductDetail/>,
           },
           {
             path: "/settings/about-us",
@@ -72,9 +79,8 @@ export const router = createBrowserRouter([
           },
           {
             path: "/settings/profile",
-            element: <ProfilePage/>,
+            element: <ProfilePage />,
           },
-  
         ],
       },
     ],
