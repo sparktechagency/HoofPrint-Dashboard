@@ -16,6 +16,7 @@ import UpdatePassword from "../Pages/Auth/UpdatePassword/UpdatePassword";
 import ProductList from "../Pages/AllProduct/ProductDetail";
 import AllProducts from "../Pages/AllProduct/AllProduct";
 import ProductDetail from "../Pages/AllProduct/ProductDetail";
+import UserDetails from "../Pages/UserManagement/UserDetails";
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +53,10 @@ export const router = createBrowserRouter([
           {
             path: "/user-management",
             element: <UserManagement />,
+          },
+              {
+            path: "/user-details",
+            element: <UserDetails/>,
           },
           {
             path: "/transection-history",

@@ -347,7 +347,6 @@ const initialUsers = [
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 14;
 
-  // for user search functionality
   const handleSearch = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
@@ -365,7 +364,6 @@ const initialUsers = [
     setCurrentPage(1);
   };
 
-  // for pagination functionality
   const indexOfLastUser = currentPage * pageSize;
   const indexOfFirstUser = indexOfLastUser - pageSize;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
@@ -375,12 +373,12 @@ const initialUsers = [
   };
 
   const handleViewUser = (user) => {
-    setSelectedUser(user); // set the clicked user
+    setSelectedUser(user);
     setIsModalOpen(true);
   };
 
   const handleBlockUser = (user) => {
-    setSelectedUser(user); // set the clicked user
+    setSelectedUser(user);
     setIsModalBlock(true);
   };
 
@@ -389,8 +387,7 @@ const initialUsers = [
   return (
     <>
       <div className="h-[calc(100vh-80px)] mt-16">
-        {/* Header with search */}
-        <div className="p-4 flex justify-between">
+        <div className="flex justify-between p-4">
           <div className="w-72">
             <input
               type="text"
@@ -405,7 +402,6 @@ const initialUsers = [
           </div>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto ">
           <table className="w-full">
             <thead className="bg-[#101749] ">
@@ -428,7 +424,7 @@ const initialUsers = [
                       <img
                         src={user.avatar}
                         alt="User Avatar"
-                        className="w-10 h-10 rounded-full object-cover"
+                        className="object-cover w-10 h-10 rounded-full"
                       />
                       <p>{user.name}</p>
                     </div>
@@ -444,8 +440,7 @@ const initialUsers = [
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="flex justify-end py-4">
+        <div className="flex justify-center py-4">
           <button
             onClick={() => onPageChange(currentPage - 1)}
             className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50"
@@ -459,7 +454,7 @@ const initialUsers = [
               onClick={() => onPageChange(index + 1)}
               className={`px-3 py-1 mx-1 rounded-full ${
                 currentPage === index + 1
-                  ? "text-red-500"
+                  ? "text-white bg-[#101749]"
                   : "bg-transparent text-black"
               }`}
             >
@@ -476,20 +471,16 @@ const initialUsers = [
         </div>
       </div>
 
-      {/* ================= Modal for user  details ============= */}
       {isModalOpen && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md p-4 overflow-hidden bg-white rounded-md">
             <div className="relative">
-              {/* Modal Close Button */}
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="absolute p-1 text-white rounded-full right-2 top-2 bg-white/10 hover:bg-white/20"
               >
                 <IoMdClose />
               </button>
-
-              {/* Modal Header */}
               <div className="bg-[#52B5D1] p-6 text-center rounded-md">
                 <div className="w-24 h-24 mx-auto mb-4 overflow-hidden border-4 border-white rounded-full">
                   <img src={userImage} className="object-cover w-full h-full" />
@@ -498,8 +489,6 @@ const initialUsers = [
                   {selectedUser.name}
                 </h2>
               </div>
-
-              {/* Modal  Content  */}
               <div className="p-6">
                 <div className="flex flex-col gap-4">
                   <div className="flex justify-between">
@@ -509,10 +498,11 @@ const initialUsers = [
                     </div>
                     <div className="w-1/3">
                       <h3 className="font-bold text-black">Account Type</h3>
-                      <p className="text-gray-700">{selectedUser.accType}</p>
+                      <p className="text-gray-700">
+                        {selectedUser.accType || "Standard"}
+                      </p>
                     </div>
                   </div>
-
                   <div className="flex justify-between">
                     <div className="w-2/3">
                       <h3 className="font-bold text-black">Date Joined</h3>
@@ -520,15 +510,9 @@ const initialUsers = [
                     </div>
                     <div className="w-1/3">
                       <h3 className="font-bold text-black">Location</h3>
-                      <p className="text-gray-700">USA</p>{" "}
-                      {/* You can customize */}
+                      <p className="text-gray-700">{selectedUser.location}</p>
                     </div>
                   </div>
-                </div>
-                {/* Social Media Buttons */}
-                <div className="mt-6">
-                  <h3 className="mb-2 font-semibold text-black">Attach File</h3>
-                  <div className="flex space-x-2"></div>
                 </div>
               </div>
             </div>
@@ -536,25 +520,16 @@ const initialUsers = [
         </div>
       )}
 
-      {/* ================= Modal for  Block Users ============= */}
       {isModalBlock && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md overflow-hidden bg-white rounded-md">
             <div className="relative">
-              {/* Modal Close Button */}
               <button
                 onClick={() => setIsModalBlock(false)}
-                this
-                close
-                not
-                working
                 className="absolute p-1 rounded-full right-2 top-2 bg-white/10 hover:bg-white/20"
               >
                 <IoMdClose />
               </button>
-
-              {/* Modal Header */}
-
               <div className="flex flex-col items-center justify-center py-12 space-y-4 px-11">
                 <h2 className="text-xl font-bold text-[#101749]">
                   Are You Sure You Want to Block?

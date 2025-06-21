@@ -1,71 +1,50 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Chart, registerables } from "chart.js";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { CalendarDays } from "lucide-react";
 
 Chart.register(...registerables);
 
-// UserOverviewChart Component
 function UserOverviewChart() {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
   useEffect(() => {
     if (!chartRef.current) return;
-
-    // Destroy existing chart instance if it exists
-    if (chartInstance.current) {
-      chartInstance.current.destroy();
-    }
+    if (chartInstance.current) chartInstance.current.destroy();
 
     const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
-    // Sample data that mimics the chart in the image
-    const data = {
-      labels: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sept",
-        "Oct",
-        "Nov",
-        "Dec",
-      ],
-      datasets: [
-        {
-          label: "Users",
-          data: [85, 80, 75, 65, 40, 45, 60, 75, 95, 85, 90, 75],
-          fill: true,
-          backgroundColor: function (context) {
-            const chart = context.chart;
-            const ctx = chart.ctx;
-            const gradient = ctx.createLinearGradient(0, 0, 0, chart.height);
-            gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
-            gradient.addColorStop(0.8, "rgba(16, 23, 73, 1)"); 
-            gradient.addColorStop(1, "rgba(16, 23, 73, 1)");
 
-            return gradient;
-          },
-          // borderColor: "#101749",
-          tension: 0.4,
-          pointRadius: 0,
+    const data = {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"],
+      datasets: [{
+        label: "Users",
+        data: [85, 80, 75, 65, 40, 45, 60, 75, 95, 85, 90, 75],
+        fill: true,
+        backgroundColor: function (context) {
+          const chart = context.chart;
+          const ctx = chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, chart.height);
+          gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+          gradient.addColorStop(0.8, "rgba(16, 23, 73, 1)");
+          gradient.addColorStop(1, "rgba(16, 23, 73, 1)");
+          return gradient;
         },
-      ],
+        tension: 0.4,
+        pointRadius: 0,
+      }],
     };
 
     chartInstance.current = new Chart(ctx, {
       type: "line",
-      data: data,
+      data,
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            display: false,
-          },
+          legend: { display: false },
           tooltip: {
             mode: "index",
             intersect: false,
@@ -80,37 +59,18 @@ function UserOverviewChart() {
           y: {
             beginAtZero: true,
             max: 100,
-            grid: {
-              color: "rgba(255, 255, 255, 0.1)",
-            },
-            ticks: {
-              color: "#101749",
-              font: {
-                size: 12,
-              },
-              stepSize: 20,
-            },
+            grid: { color: "rgba(255, 255, 255, 0.1)" },
+            ticks: { color: "#101749", font: { size: 12 }, stepSize: 20 },
           },
           x: {
-            grid: {
-              display: false,
-            },
-            ticks: {
-              color: "#101749",
-              font: {
-                size: 12,
-              },
-            },
+            grid: { display: false },
+            ticks: { color: "#101749", font: { size: 12 } },
           },
         },
       },
     });
 
-    return () => {
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
-      }
-    };
+    return () => chartInstance.current?.destroy();
   }, []);
 
   return (
@@ -120,41 +80,112 @@ function UserOverviewChart() {
   );
 }
 
+// ---------------------------
 // Main Dashboard Component
+// ---------------------------
 function DashboardPage() {
+  const [startDate, setStartDate] = useState(new Date("2025-06-16"));
+  const [endDate, setEndDate] = useState(new Date("2025-09-10"));
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  const presets = [
+    "Last 24 hours",
+    "Last 7 days",
+    "Last 30 days",
+    "Custom Range",
+  ];
+
   return (
-    <div className="container p-4 mx-auto">
+    <div className="container relative p-4 mx-auto">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-medium text-black">
-            Total User Overview
-          </h2>
+          <h2 className="text-2xl font-medium text-black">Total User Overview</h2>
+
           <div className="flex items-center gap-6">
-            <span className="text-black">Monthly Growth</span>
-            <span className="font-bold text-black"> 35.80 %</span>
-            <div className="relative">
-              <select
-                className="px-4 py-1 pr-8 text-black border border-black rounded-md appearance-none focus:outline-none"
-                defaultValue="2024"
-              >
-                <option>2024</option>
-                <option>2023</option>
-                <option>2022</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 text-white pointer-events-none">
-                <svg
-                  className="w-4 h-4 fill-current"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                </svg>
-              </div>
-            </div>
+            {/* Calendar Trigger */}
+            <button
+              onClick={() => setShowCalendar(!showCalendar)}
+              className="flex items-center px-4 py-2 text-sm text-black border border-black rounded-md"
+            >
+              <CalendarDays className="w-5 h-5 mr-2" />
+              {startDate?.toLocaleDateString()} to {endDate?.toLocaleDateString()}
+            </button>
           </div>
         </div>
+
+        {/* Chart */}
         <UserOverviewChart />
       </div>
+
+      {/* Calendar Popup */}
+ {showCalendar && (
+  <>
+    {/* Overlay */}
+    <div
+      className="fixed inset-0 z-40 bg-black bg-opacity-30"
+      onClick={() => setShowCalendar(false)}
+    />
+
+    {/* Centered Popup */}
+    <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border rounded-md shadow-xl flex p-6 min-w-[700px]">
+      {/* Date Inputs & Calendar */}
+      <div className="grid grid-cols-2 gap-4 p-4">
+        <div>
+          <label className="text-sm font-semibold text-black">From</label>
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
+            dateFormat="dd-MM-yyyy"
+            className="w-full px-3 py-2 mt-1 border"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-semibold text-black">To</label>
+          <DatePicker
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
+            dateFormat="dd-MM-yyyy"
+            className="w-full px-3 py-2 mt-1 border"
+          />
+        </div>
+        <div className="flex col-span-2 gap-6 mt-4">
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
+            inline
+          />
+          <DatePicker
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
+            inline
+          />
+        </div>
+      </div>
+
+      {/* Presets */}
+      <div className="flex flex-col pl-4 border-l">
+        {presets.map((item, idx) => (
+          <button
+            key={idx}
+            className={`text-left px-4 py-2 hover:bg-gray-100 rounded-md text-sm ${
+              item === "Custom Range" ? "bg-orange-100 font-semibold" : ""
+            }`}
+          >
+            {item}
+          </button>
+        ))}
+        <button
+          className="px-4 py-2 mt-auto text-white bg-blue-900 rounded-md"
+          onClick={() => setShowCalendar(false)}
+        >
+          Apply
+        </button>
+      </div>
+    </div>
+  </>
+)}
+
+
     </div>
   );
 }

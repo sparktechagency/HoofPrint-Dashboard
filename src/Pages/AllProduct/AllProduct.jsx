@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Updated import
-import { FaCalendarAlt } from 'react-icons/fa'; // Import calendar icon
+import { useNavigate } from 'react-router-dom'; 
+import { FaCalendarAlt } from 'react-icons/fa'; 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 

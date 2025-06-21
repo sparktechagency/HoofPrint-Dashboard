@@ -3,6 +3,8 @@ import { EyeOutlined } from "@ant-design/icons";
 import { IoIosArrowBack, IoIosArrowForward, IoMdClose } from "react-icons/io";
 import { MdBlock } from "react-icons/md";
 import userImage from "../../assets/image/admin.jpg";
+import { FaRegUser } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 function UserManagement() {
   // Generate more sample data
@@ -257,6 +259,8 @@ function UserManagement() {
   const [filteredUsers, setFilteredUsers] = useState(initialUsers);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 14;
+  const navigate = useNavigate();
+
 
   // for user search functionality
   const handleSearch = (e) => {
@@ -285,10 +289,9 @@ function UserManagement() {
     setCurrentPage(page);
   };
 
-  const handleViewUser = (user) => {
-    setSelectedUser(user); // set the clicked user
-    setIsModalOpen(true);
-  };
+    const handleViewUser = (user) => {
+  navigate(`/user-details/${user.id}`, { state: { user } }); // Passing user data as state
+};
 
   const handleBlockUser = (user) => {
     setSelectedUser(user); // set the clicked user
@@ -301,7 +304,7 @@ function UserManagement() {
     <>
       <div className="h-[calc(100vh-80px)] mt-16">
         {/* Header with search */}
-        <div className="p-4 flex justify-end">
+        <div className="flex justify-end p-4">
           <div className="w-72">
             <input
               type="text"
@@ -323,7 +326,7 @@ function UserManagement() {
                 <th className="px-4 py-3 text-left">Location</th>
                 <th className="px-4 py-3 text-left">Email</th>
                 <th className="px-4 py-3 text-left">Phone Number</th>
-                <th className="px-4 py-3 text-left">Action</th>
+                <th className="px-4 py-3 text-left">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -335,7 +338,7 @@ function UserManagement() {
                       <img
                         src={user.avatar}
                         alt="User Avatar"
-                        className="w-10 h-10 rounded-full object-cover"
+                        className="object-cover w-10 h-10 rounded-full"
                       />
                       <p>{user.name}</p>
                     </div>
@@ -345,16 +348,16 @@ function UserManagement() {
                   <td className="px-4 text-black">{user.phone}</td>
                   <td className="flex px-4 py-3 space-x-4">
                     <button
-                      onClick={() => handleViewUser(user)}
-                      className="text-white hover:text-gray-200"
-                    >
-                      <EyeOutlined size={20} />
-                    </button>
-                    <button
                       onClick={() => handleBlockUser(user)}
                       className="text-[#101749] hover:text-red-300"
                     >
                       <MdBlock size={20} />
+                    </button>
+                       <button
+                      onClick={() => handleViewUser(user)}
+                      className="text-[#101749] hover:text-red-300"
+                    >
+                      <FaRegUser size={20} />
                     </button>
                   </td>
                 </tr>
@@ -364,13 +367,14 @@ function UserManagement() {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-end py-4">
+        <div className="flex justify-center py-4">
           <button
             onClick={() => onPageChange(currentPage - 1)}
             className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50"
             disabled={currentPage === 1}
           >
             <IoIosArrowBack size={20} />
+            
           </button>
           {[...Array(totalPages)].map((_, index) => (
             <button
@@ -378,7 +382,7 @@ function UserManagement() {
               onClick={() => onPageChange(index + 1)}
               className={`px-3 py-1 mx-1 rounded-full ${
                 currentPage === index + 1
-                  ? "text-red-500"
+                  ? "text-white bg-[#101749]"
                   : "bg-transparent text-black"
               }`}
             >
