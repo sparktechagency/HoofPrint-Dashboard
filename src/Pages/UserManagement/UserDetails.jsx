@@ -29,12 +29,12 @@ const UserDetails = () => {
       <div className="min-h-screen p-6 mt-16 bg-gray-50">
         <div>
           {/* Back Button */}
-            <button className=" px-4 py-2 mb-2  text-white transition-colors rounded-md bg-[#101749] hover:bg-slate-700">
-          <Link to={"/user-management"} className="flex items-center gap-2" >
+          <button className=" px-4 py-2 mb-2  text-white transition-colors rounded-md bg-[#101749] hover:bg-slate-700">
+            <Link to={"/user-management"} className="flex items-center gap-2">
               <FaArrowLeft />
               Back to User Page
-          </Link>
-            </button>
+            </Link>
+          </button>
 
           {/* User Details Section */}
           <div className="p-6 mb-8 bg-white border border-gray-200 rounded-lg shadow-sm">

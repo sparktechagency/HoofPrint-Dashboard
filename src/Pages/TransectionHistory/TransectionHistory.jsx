@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { EyeOutlined } from "@ant-design/icons";
 import { IoIosArrowBack, IoIosArrowForward, IoMdClose } from "react-icons/io";
 import { MdBlock } from "react-icons/md";
 import userImage from "../../assets/image/admin.jpg";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { CalendarDays } from "lucide-react";
 
 function TransectionHistory() {
-const initialUsers = [
+ const initialUsers = [
   {
     id: "#01",
     name: "Alice Johnson",
@@ -339,13 +341,17 @@ const initialUsers = [
 ];
 
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+ const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalBlock, setIsModalBlock] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState(initialUsers);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 14;
+
+  const [startDate, setStartDate] = useState(new Date("2025-06-16"));
+  const [endDate, setEndDate] = useState(new Date("2025-09-10"));
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const handleSearch = (e) => {
     const term = e.target.value;
@@ -384,8 +390,15 @@ const initialUsers = [
 
   const totalPages = Math.ceil(filteredUsers.length / pageSize);
 
+  const presets = [
+    "Last 24 hours",
+    "Last 7 days",
+    "Last 30 days",
+    "Custom Range",
+  ];
+
   return (
-    <>
+      <>
       <div className="h-[calc(100vh-80px)] mt-16">
         <div className="flex justify-between p-4">
           <div className="w-72">
@@ -398,11 +411,17 @@ const initialUsers = [
             />
           </div>
           <div>
-            <input type="date" />
+            <button
+              onClick={() => setShowCalendar(!showCalendar)}
+              className="flex items-center px-4 py-2 text-sm text-black border border-black rounded-md"
+            >
+              <CalendarDays className="w-5 h-5 mr-2" />
+              {startDate?.toLocaleDateString()} to {endDate?.toLocaleDateString()}
+            </button>
           </div>
         </div>
 
-        <div className="overflow-x-auto ">
+        <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[#101749] ">
               <tr className="text-white">
@@ -471,77 +490,70 @@ const initialUsers = [
         </div>
       </div>
 
-      {isModalOpen && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md p-4 overflow-hidden bg-white rounded-md">
-            <div className="relative">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="absolute p-1 text-white rounded-full right-2 top-2 bg-white/10 hover:bg-white/20"
-              >
-                <IoMdClose />
-              </button>
-              <div className="bg-[#52B5D1] p-6 text-center rounded-md">
-                <div className="w-24 h-24 mx-auto mb-4 overflow-hidden border-4 border-white rounded-full">
-                  <img src={userImage} className="object-cover w-full h-full" />
-                </div>
-                <h2 className="text-xl font-bold text-white">
-                  {selectedUser.name}
-                </h2>
+      {/* Calendar Popup */}
+      {showCalendar && (
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 z-40 bg-black bg-opacity-30"
+            onClick={() => setShowCalendar(false)}
+          />
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border rounded-md shadow-xl flex p-6 min-w-[700px]">
+            {/* Date Inputs & Calendar */}
+            <div className="grid grid-cols-2 gap-4 p-4">
+              <div>
+                <label className="text-sm font-semibold text-black">From</label>
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  dateFormat="dd-MM-yyyy"
+                  className="w-full px-3 py-2 mt-1 border"
+                />
               </div>
-              <div className="p-6">
-                <div className="flex flex-col gap-4">
-                  <div className="flex justify-between">
-                    <div className="w-2/3">
-                      <h3 className="font-bold text-black ">Email</h3>
-                      <p className="text-gray-700">{selectedUser.email}</p>
-                    </div>
-                    <div className="w-1/3">
-                      <h3 className="font-bold text-black">Account Type</h3>
-                      <p className="text-gray-700">
-                        {selectedUser.accType || "Standard"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <div className="w-2/3">
-                      <h3 className="font-bold text-black">Date Joined</h3>
-                      <p className="text-gray-700">{selectedUser.date}</p>
-                    </div>
-                    <div className="w-1/3">
-                      <h3 className="font-bold text-black">Location</h3>
-                      <p className="text-gray-700">{selectedUser.location}</p>
-                    </div>
-                  </div>
-                </div>
+              <div>
+                <label className="text-sm font-semibold text-black">To</label>
+                <DatePicker
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  dateFormat="dd-MM-yyyy"
+                  className="w-full px-3 py-2 mt-1 border"
+                />
+              </div>
+              <div className="flex col-span-2 gap-6 mt-4">
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  inline
+                />
+                <DatePicker
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  inline
+                />
               </div>
             </div>
-          </div>
-        </div>
-      )}
 
-      {isModalBlock && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md overflow-hidden bg-white rounded-md">
-            <div className="relative">
-              <button
-                onClick={() => setIsModalBlock(false)}
-                className="absolute p-1 rounded-full right-2 top-2 bg-white/10 hover:bg-white/20"
-              >
-                <IoMdClose />
-              </button>
-              <div className="flex flex-col items-center justify-center py-12 space-y-4 px-11">
-                <h2 className="text-xl font-bold text-[#101749]">
-                  Are You Sure You Want to Block?
-                </h2>
-                <p>Do you want to Block your Users profile ?</p>
-                <button className="bg-[#101749] py-3 px-8 rounded-md font-semibold text-white">
-                  Confirm
+            {/* Presets */}
+            <div className="flex flex-col pl-4 border-l">
+              {presets.map((item, idx) => (
+                <button
+                  key={idx}
+                  className={`text-left px-4 py-2 hover:bg-gray-100 rounded-md text-sm ${
+                    item === "Custom Range" ? "bg-orange-100 font-semibold" : ""
+                  }`}
+                >
+                  {item}
                 </button>
-              </div>
+              ))}
+              <button
+                className="px-4 py-2 mt-auto text-white bg-blue-900 rounded-md"
+                onClick={() => setShowCalendar(false)}
+              >
+                Apply
+              </button>
             </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );

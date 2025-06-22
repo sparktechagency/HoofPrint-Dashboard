@@ -7,8 +7,7 @@ import { FaRegUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 function UserManagement() {
-  // Generate more sample data
-
+  // Initial Users Data
   const initialUsers = [
     {
       id: "#01",
@@ -261,26 +260,37 @@ function UserManagement() {
   const pageSize = 14;
   const navigate = useNavigate();
 
+  // Timeout for debounce
+  const timeoutRef = React.useRef(null);
 
-  // for user search functionality
+  // Handle search
   const handleSearch = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
-    if (term.trim() === "") {
-      setFilteredUsers(initialUsers);
-    } else {
-      const filtered = initialUsers.filter(
-        (user) =>
-          user.name.toLowerCase().includes(term.toLowerCase()) ||
-          user.email.toLowerCase().includes(term.toLowerCase()) ||
-          user.accType.toLowerCase().includes(term.toLowerCase())
-      );
-      setFilteredUsers(filtered);
+
+    // Clear previous timeout if there is any
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
-    setCurrentPage(1);
+
+    // Set a new timeout to debounce the search
+    timeoutRef.current = setTimeout(() => {
+      if (term.trim() === "") {
+        setFilteredUsers(initialUsers);
+      } else {
+        const filtered = initialUsers.filter(
+          (user) =>
+            user.name.toLowerCase().includes(term.toLowerCase()) ||
+            user.email.toLowerCase().includes(term.toLowerCase()) ||
+            user.accType?.toLowerCase().includes(term.toLowerCase())
+        );
+        setFilteredUsers(filtered);
+      }
+      setCurrentPage(1); // Reset to the first page
+    }, 300); // 300 ms debounce
   };
 
-  // for pagination functionality
+  // Handle pagination
   const indexOfLastUser = currentPage * pageSize;
   const indexOfFirstUser = indexOfLastUser - pageSize;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
@@ -289,9 +299,9 @@ function UserManagement() {
     setCurrentPage(page);
   };
 
-    const handleViewUser = (user) => {
-  navigate(`/user-details/${user.id}`, { state: { user } }); // Passing user data as state
-};
+  const handleViewUser = (user) => {
+    navigate(`/user-details/${user.id}`, { state: { user } });
+  };
 
   const handleBlockUser = (user) => {
     setSelectedUser(user); // set the clicked user
@@ -353,7 +363,7 @@ function UserManagement() {
                     >
                       <MdBlock size={20} />
                     </button>
-                       <button
+                    <button
                       onClick={() => handleViewUser(user)}
                       className="text-[#101749] hover:text-red-300"
                     >
@@ -374,7 +384,6 @@ function UserManagement() {
             disabled={currentPage === 1}
           >
             <IoIosArrowBack size={20} />
-            
           </button>
           {[...Array(totalPages)].map((_, index) => (
             <button
@@ -448,11 +457,6 @@ function UserManagement() {
                     </div>
                   </div>
                 </div>
-                {/* Social Media Buttons */}
-                <div className="mt-6">
-                  <h3 className="mb-2 font-semibold text-black">Attach File</h3>
-                  <div className="flex space-x-2"></div>
-                </div>
               </div>
             </div>
           </div>
@@ -467,22 +471,17 @@ function UserManagement() {
               {/* Modal Close Button */}
               <button
                 onClick={() => setIsModalBlock(false)}
-                this
-                close
-                not
-                working
                 className="absolute p-1 rounded-full right-2 top-2 bg-white/10 hover:bg-white/20"
               >
                 <IoMdClose />
               </button>
 
               {/* Modal Header */}
-
               <div className="flex flex-col items-center justify-center py-12 space-y-4 px-11">
                 <h2 className="text-xl font-bold text-[#101749]">
                   Are You Sure You Want to Block?
                 </h2>
-                <p>Do you want to Block your Users profile ?</p>
+                <p>Do you want to Block this user profile?</p>
                 <button className="bg-[#101749] py-3 px-8 rounded-md font-semibold text-white">
                   Confirm
                 </button>
