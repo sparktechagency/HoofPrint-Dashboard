@@ -110,7 +110,6 @@ const ProductDetail = () => {
   };
 
   const handleDeleteFromProductList = (index) => {
-    // Remove the product from the product list
     const updatedProducts = products.filter((_, i) => i !== index);
     setProducts(updatedProducts);
   };
