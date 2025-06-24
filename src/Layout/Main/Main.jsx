@@ -9,7 +9,7 @@ import logoImage from "../../assets/image/hoofprint.png";
 
 const MainLayout = () => {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // Mock admin profile data for design
   const adminProfile = {
@@ -35,7 +35,7 @@ const MainLayout = () => {
           </Link>
           <div
             className="flex items-center gap-4 cursor-pointer md:mr-8"
-            onClick={() => navigate("/profile")}
+            // onClick={() => navigate("/profile")}
           >
             <div className="items-center justify-center hidden w-10 h-10 overflow-hidden bg-gray-100 rounded-full md:flex">
               <img src={adminImage} alt="admin" />
