@@ -3,14 +3,14 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import { useParams, useNavigate } from "react-router-dom";
 
 const ProductDetail = () => {
-  const { categoryId } = useParams(); // Get categoryId from URL
+  const { categoryId } = useParams();
   const navigate = useNavigate();
   const [categoryName, setCategoryName] = useState("");
 
   const [products, setProducts] = useState([
     {
       id: 1,
-      categoryId: 1, // Sodlar
+      categoryId: 1,
       image:
         "https://images.pexels.com/photos/28298815/pexels-photo-28298815/free-photo-of-a-man-in-cowboy-hat-riding-a-horse.jpeg",
       title: "Ridjacka",
@@ -18,7 +18,7 @@ const ProductDetail = () => {
     },
     {
       id: 2,
-      categoryId: 2, // Hjalmor
+      categoryId: 2,
       image:
         "https://images.pexels.com/photos/28246719/pexels-photo-28246719/free-photo-of-a-man-riding-a-horse-in-a-dirt-field.jpeg",
       title: "Träns",
@@ -26,7 +26,7 @@ const ProductDetail = () => {
     },
     {
       id: 3,
-      categoryId: 2, // Hjalmor
+      categoryId: 2,
       image:
         "https://images.pexels.com/photos/28347217/pexels-photo-28347217/free-photo-of-a-man-on-a-horse-throwing-a-ball.jpeg",
       title: "Ridjacka",
@@ -34,14 +34,14 @@ const ProductDetail = () => {
     },
     {
       id: 4,
-      categoryId: 3, // Sajjer
+      categoryId: 3,
       image: "https://images.pexels.com/photos/1069723/pexels-photo-1069723.jpeg",
       title: "Ridbyxor",
       price: 150,
     },
     {
       id: 5,
-      categoryId: 1, // Sodlar
+      categoryId: 1,
       image:
         "https://images.pexels.com/photos/31966333/pexels-photo-31966333/free-photo-of-young-woman-embracing-a-white-horse-outdoors.jpeg",
       title: "Ridbyxor",
@@ -49,14 +49,14 @@ const ProductDetail = () => {
     },
     {
       id: 6,
-      categoryId: 2, // Hjalmor
+      categoryId: 2,
       image: "https://images.pexels.com/photos/7882321/pexels-photo-7882321.jpeg",
       title: "Ridhjälm",
       price: 180,
     },
     {
       id: 7,
-      categoryId: 2, // Hjalmor
+      categoryId: 2,
       image:
         "https://images.pexels.com/photos/28298815/pexels-photo-28298815/free-photo-of-a-man-in-cowboy-hat-riding-a-horse.jpeg",
       title: "Träns",
@@ -64,7 +64,7 @@ const ProductDetail = () => {
     },
     {
       id: 8,
-      categoryId: 3, // Sajjer
+      categoryId: 3,
       image:
         "https://images.pexels.com/photos/28246719/pexels-photo-28246719/free-photo-of-a-man-riding-a-horse-in-a-dirt-field.jpeg",
       title: "Sadel",
@@ -72,7 +72,7 @@ const ProductDetail = () => {
     },
     {
       id: 9,
-      categoryId: 1, // Sodlar
+      categoryId: 1,
       image:
         "https://images.pexels.com/photos/28347217/pexels-photo-28347217/free-photo-of-a-man-on-a-horse-throwing-a-ball.jpeg",
       title: "Sadel",
@@ -80,39 +80,39 @@ const ProductDetail = () => {
     },
     {
       id: 10,
-      categoryId: 3, // Sajjer
+      categoryId: 3,
       image: "https://images.pexels.com/photos/1069723/pexels-photo-1069723.jpeg",
       title: "Ridstövlar",
       price: 700,
     },
   ]);
 
-  // Map category IDs to names
   const categoryNames = {
     1: "Sodlar",
     2: "Hjalmor",
     3: "Sajjer",
   };
 
-  // Filter products based on selected category
   const filteredProducts = products.filter(
     (product) => product.categoryId === Number.parseInt(categoryId)
   );
 
   useEffect(() => {
-    // Set category name based on categoryId from URL
     const name = categoryNames[Number.parseInt(categoryId)] || "Unknown Category";
     setCategoryName(name);
   }, [categoryId]);
 
   const handleBack = () => {
-    navigate(-1); // Go back to previous page
+    navigate(-1);
   };
 
   const handleDeleteFromProductList = (index) => {
     const updatedProducts = products.filter((_, i) => i !== index);
     setProducts(updatedProducts);
   };
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDeleteIndex, setProductToDeleteIndex] = useState(null);
 
   return (
     <div className="min-h-screen mt-16 bg-gray-50">
@@ -148,15 +148,18 @@ const ProductDetail = () => {
                   <img
                     src={product.image || "/placeholder.svg"}
                     alt={product.title}
-                    className="object-cover w-full h-full"
+                    className="object-cover w-full h-full "
                   />
 
                   {/* Delete Icon */}
                   <button
-                    onClick={() => handleDeleteFromProductList(index)} // Delete product from the list
-                    className="absolute p-2 text-white rounded-full top-2 right-2"
+                    onClick={() => {
+                      setProductToDeleteIndex(index);
+                      setShowDeleteModal(true);
+                    }}
+                    className="absolute p-2 text-xs text-white rounded-full top-2 right-2 hover:bg-gray-700"
                   >
-                    <RiDeleteBin5Line />
+                    <RiDeleteBin5Line size={20} />
                   </button>
                 </div>
 
@@ -172,6 +175,36 @@ const ProductDetail = () => {
           </div>
         )}
       </div>
+
+      {/* Confirmation Popup */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="p-6 text-center bg-white rounded-lg shadow-lg w-80">
+            <h2 className="mb-4 text-lg font-semibold">Are you sure you want to delete ?</h2>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  handleDeleteFromProductList(productToDeleteIndex);
+                  setShowDeleteModal(false);
+                  setProductToDeleteIndex(null);
+                }}
+                className="bg-[#0f1742] hover:bg-[#0c1233] text-white py-2 rounded"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setProductToDeleteIndex(null);
+                }}
+                className="border border-[#0f1742] text-[#0f1742] py-2 rounded"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
