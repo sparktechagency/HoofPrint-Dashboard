@@ -1,27 +1,34 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom"; 
 import { FaCalendarAlt } from 'react-icons/fa'; 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { HiOutlineFolderOpen } from 'react-icons/hi';
 
 const AllProducts = () => {
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("All Category");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("Sort By Price (low to High)");
 
-  const [startDate, setStartDate] = useState(new Date()); // Store selected start date
-  const [endDate, setEndDate] = useState(new Date()); // Store selected end date
-  const [calendarVisible, setCalendarVisible] = useState(false); // To show/hide calendar
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [calendarVisible, setCalendarVisible] = useState(false); 
 
   const productCategories = [
-    { id: 1, name: "Sodlar", products: 5, sale: 0, selltime: 2  },
+    { id: 1, name: "Sodlar", products: 5, sale: 0, selltime: 2 },
     { id: 2, name: "Hjalmor", products: 15, sale: 10, selltime: 6 },
     { id: 3, name: "Sajjer", products: 16, sale: 10, selltime: 5 },
   ];
 
-  // Navigate to the ProductDetail page with the category ID
+  const presets = [
+    "Last 24 hours",
+    "Last 7 days",
+    "Last 30 days",
+    "Custom Range",
+  ];
+
   const handleViewProducts = (categoryId) => {
     navigate(`/product-detail/${categoryId}`);
   };
@@ -40,28 +47,60 @@ const AllProducts = () => {
                 className="flex items-center text-blue-800"
               >
                 <FaCalendarAlt className="mr-2" />
-                {`${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`} 
-                {/* Display selected date range */}
+                {`${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`}
               </button>
 
               {/* Conditionally render calendar popup */}
               {calendarVisible && (
-                <div className="absolute z-10 mt-80 ">
-                  <div className="flex gap-4">
+                <div className="fixed inset-0 z-40 bg-black bg-opacity-30" onClick={() => setCalendarVisible(false)} />
+              )}
+              {calendarVisible && (
+                <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border rounded-md shadow-xl flex p-6 min-w-[700px]">
+                  <div className="grid grid-cols-2 gap-4 p-4">
                     {/* From Date Picker */}
-                    <DatePicker
-                      selected={startDate}
-                      onChange={(date) => setStartDate(date)}
-                      dateFormat="MM/dd/yyyy"
-                      inline
-                    />
+                    <div>
+                      <label className="text-sm font-semibold text-black">From</label>
+                      <DatePicker
+                        selected={startDate}
+                        onChange={(date) => setStartDate(date)}
+                        dateFormat="MM/dd/yyyy"
+                        className="w-full px-3 py-2 mt-1 border"
+                      />
+                    </div>
                     {/* To Date Picker */}
-                    <DatePicker
-                      selected={endDate}
-                      onChange={(date) => setEndDate(date)}
-                      dateFormat="MM/dd/yyyy"
-                      inline
-                    />
+                    <div>
+                      <label className="text-sm font-semibold text-black">To</label>
+                      <DatePicker
+                        selected={endDate}
+                        onChange={(date) => setEndDate(date)}
+                        dateFormat="MM/dd/yyyy"
+                        className="w-full px-3 py-2 mt-1 border"
+                      />
+                    </div>
+                    <div className="flex col-span-2 gap-6 mt-4">
+                      <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} inline />
+                      <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} inline />
+                    </div>
+                  </div>
+
+                  {/* Presets */}
+                  <div className="flex flex-col pl-4 border-l">
+                    {presets.map((item, idx) => (
+                      <button
+                        key={idx}
+                        className={`text-left px-4 py-2 hover:bg-gray-100 rounded-md text-sm ${
+                          item === "Custom Range" ? "bg-orange-100 font-semibold" : ""
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    ))}
+                    <button
+                      className="px-4 py-2 mt-auto text-white bg-blue-900 rounded-md"
+                      onClick={() => setCalendarVisible(false)}
+                    >
+                      Apply
+                    </button>
                   </div>
                 </div>
               )}
@@ -155,7 +194,7 @@ const AllProducts = () => {
 
               {/* View Products Link */}
               <button
-                onClick={() => handleViewProducts(category.id)} // Pass category ID
+                onClick={() => handleViewProducts(category.id)}
                 className="flex items-center gap-1 text-sm font-medium text-blue-600 transition-colors hover:text-blue-800"
               >
                 View Products
