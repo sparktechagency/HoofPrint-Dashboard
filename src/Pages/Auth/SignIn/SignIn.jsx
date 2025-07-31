@@ -1,43 +1,44 @@
-import { Checkbox, Form, Input, Typography } from "antd";
+import { Checkbox, Form, Input, Typography, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useLogInMutation } from "../../../features/api/authApi";
 import { useDispatch } from "react-redux";
 import { setToken } from "../../../features/slices/authSlice";
-// import { setToken } from "../../../features/slices/authSlice";
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [showpassword, setShowpassword] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [logIn, { data, error, isLoading }] = useLogInMutation();
-  const dispatch = useDispatch();
-
-
+  const [logIn] = useLogInMutation();
 
   const togglePasswordVisibility = () => {
     setShowpassword(!showpassword);
   };
 
-const onFinish = async (values) => {
-  setLoading(true);
-  try {
-    const result = await logIn(values).unwrap();
+  const onFinish = async (values) => {
+    setLoading(true);
+    try {
+      const result = await logIn(values).unwrap();
 
-    if (result?.data?.accessToken) {
-      dispatch(setToken(result.data.accessToken)); 
-      localStorage.setItem("user", JSON.stringify(result.data));
-      navigate("/dashboard");
-    } else {
-      console.error("Login failed, no token received.");
+      if (result?.data?.accessToken) {
+        dispatch(setToken(result.data.accessToken));
+        localStorage.setItem("user", JSON.stringify(result.data));
+        navigate("/dashboard");
+      } else {
+        message.error("Login failed, please try again.");
+      }
+    } catch (err) {
+      const backendMessage =
+        err?.data?.message ??
+        err?.error ??
+        "Login failed. Please check your credentials.";
+      message.error(backendMessage);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Login error:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="bg-white">
@@ -59,21 +60,23 @@ const onFinish = async (values) => {
                   Please enter your email and password to continue
                 </Typography.Text>
               </div>
-              <Form.Item name="email" label={<p className=" text-md">Email</p>}>
-                <Input
-                  // required
-                  className=" text-md"
-                  placeholder="Your Email"
-                />
+              <Form.Item
+                name="email"
+                label={<p className=" text-md">Email</p>}
+                rules={[{ required: true, message: "Please enter your email" }]}
+              >
+                <Input className="text-md" placeholder="Your Email" />
               </Form.Item>
               <Form.Item
                 name="password"
                 label={<p className=" text-md">Password</p>}
+                rules={[
+                  { required: true, message: "Please enter your password" },
+                ]}
               >
                 <div className="relative flex items-center justify-center">
                   <Input
-                    // required
-                    className=" text-md"
+                    className="text-md"
                     type={showpassword ? "password" : "text"}
                     placeholder="Password"
                   />
@@ -102,11 +105,11 @@ const onFinish = async (values) => {
               </div>
               <Form.Item className="my-10 text-center">
                 <button
-                  className="bg-[#101749] text-center   p-2 font-semibold  text-white px-10 py-2 rounded-md "
+                  className="bg-[#101749] text-center p-2 font-semibold text-white px-10 py-2 rounded-md"
                   type="submit"
                   disabled={loading}
                 >
-                  Sign in
+                  {loading ? "Signing in..." : "Sign in"}
                 </button>
               </Form.Item>
             </Form>

@@ -4,10 +4,9 @@ import { BASE_URL } from "../../utils/api";
 export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${BASE_URL}/api/v1`,
+    baseUrl: BASE_URL,
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth.token;
-      console.log("the token is" , token)
       if (token) {
         headers.set("Authorization", token);
       }
@@ -16,7 +15,7 @@ export const userApi = createApi({
   }),
   endpoints: (builder) => ({
     getAllUsers: builder.query({
-      query: () => "auth/find_by_admin_all_users",
+      query: () => `/normal-user/get-all-user`,
     }),
   }),
 });
