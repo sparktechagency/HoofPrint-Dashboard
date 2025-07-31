@@ -2,24 +2,42 @@ import { Checkbox, Form, Input, Typography } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
+import { useLogInMutation } from "../../../features/api/authApi";
+import { useDispatch } from "react-redux";
+import { setToken } from "../../../features/slices/authSlice";
+// import { setToken } from "../../../features/slices/authSlice";
 
 const SignIn = () => {
   const navigate = useNavigate();
-  const [showpassword, setShowpassword] = useState(false);
+  const [showpassword, setShowpassword] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [logIn, { data, error, isLoading }] = useLogInMutation();
+  const dispatch = useDispatch();
+
+
 
   const togglePasswordVisibility = () => {
     setShowpassword(!showpassword);
   };
 
-  const onFinish = (values) => {
-    setLoading(true);
-    // Simulating login without actual API call
-    setTimeout(() => {
-      setLoading(false);
+const onFinish = async (values) => {
+  setLoading(true);
+  try {
+    const result = await logIn(values).unwrap();
+
+    if (result?.data?.accessToken) {
+      dispatch(setToken(result.data.accessToken)); 
+      localStorage.setItem("user", JSON.stringify(result.data));
       navigate("/dashboard");
-    }, 1500);
-  };
+    } else {
+      console.error("Login failed, no token received.");
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="bg-white">

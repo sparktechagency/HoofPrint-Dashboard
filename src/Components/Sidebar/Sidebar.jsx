@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FiUser, FiLogOut } from "react-icons/fi";
 import { BiChevronDown } from "react-icons/bi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MdDashboard, MdOutlineShoppingCart, MdPrivacyTip } from "react-icons/md";
 import { FaEdit, FaRegUser } from "react-icons/fa";
 import { RiTerminalWindowLine } from "react-icons/ri";
@@ -9,12 +9,16 @@ import { PiUsers } from "react-icons/pi";
 import { GrUserSettings } from "react-icons/gr";
 import { CiSettings, CiUser } from "react-icons/ci";
 import { BsArrowLeftRight } from "react-icons/bs";
+import { logout } from "../../features/slices/authSlice";
+import { useDispatch } from "react-redux";
 
 
 const Sidebar = ({ closeDrawer }) => {
   const [active, setActive] = useState("Dashboard");
   const [openDropdown, setOpenDropdown] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const menuItems = [
     {
@@ -85,6 +89,13 @@ const Sidebar = ({ closeDrawer }) => {
 
   const filteredItems = filterMenuItems(menuItems);
 
+
+    const handleLogout = () => {
+    localStorage.removeItem("user");        
+    dispatch(logout());                     
+    navigate("/sign-in");                    
+  };
+
   return (
     <div className="flex flex-col h-full p-3 bg-white w-72">
         <div className="mx-auto">
@@ -144,12 +155,12 @@ const Sidebar = ({ closeDrawer }) => {
           </div>
         ))}
       </div>
-      <Link to="/sign-in">
-        <div className="flex items-center justify-center w-full py-3 mt-4 rounded-lg cursor-pointer ">
+     
+        <button onClick={handleLogout} className="flex items-center justify-center w-full py-3 mt-4 rounded-lg cursor-pointer ">
           <FiLogOut className="text-xl" />
           <p className="ml-2">Log out</p>
-        </div>
-      </Link>
+        </button>
+     
     </div>
   );
 };
