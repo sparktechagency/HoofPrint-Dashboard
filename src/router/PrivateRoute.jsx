@@ -7,7 +7,6 @@ const PrivateRoute = () => {
   if (!user || !user.accessToken) {
     return <Navigate to="/sign-in" replace />;
   }
-
   return <Outlet />;
 };
 

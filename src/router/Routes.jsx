@@ -17,6 +17,7 @@ import ProductList from "../Pages/AllProduct/ProductDetail";
 import AllProducts from "../Pages/AllProduct/AllProduct";
 import ProductDetail from "../Pages/AllProduct/ProductDetail";
 import UserDetails from "../Pages/UserManagement/UserDetails";
+import Brand from "../Pages/Brand/Brand";
 
 export const router = createBrowserRouter([
   {
@@ -65,6 +66,10 @@ export const router = createBrowserRouter([
           {
             path: "/all-products",
             element: <AllProduct/>,
+          },
+              {
+            path: "/brand",
+            element: <Brand/>,
           },
           {
             path: "/product-detail/:categoryId",

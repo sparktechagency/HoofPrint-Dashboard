@@ -20,14 +20,14 @@ function UserManagement() {
 
   const { data, error, isLoading } = useGetAllUsersQuery();
 
-  console.log(data)
+  // console.log(data)
   const apiUsers = data?.data?.result || [];
 
 
   useEffect(() => {
     if (apiUsers.length > 0) {
       const formattedUsers = apiUsers.map((user, index) => ({
-        id: `#${index + 1}`,
+        id: `${index + 1}`,
         name: user.name,
         email: user.email,
         phone: user.phone,

@@ -42,6 +42,11 @@ const Sidebar = ({ closeDrawer }) => {
       label: "All Products",
       Link: "/all-products",
     },
+               {
+      icon: <MdOutlineShoppingCart className="w-5 h-5" />,
+      label: "Brand",
+      Link: "/brand",
+    },
     {
       icon: <CiSettings className="w-5 h-5" />,
       label: "Settings",
