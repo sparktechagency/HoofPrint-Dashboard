@@ -18,6 +18,7 @@ import AllProducts from "../Pages/AllProduct/AllProduct";
 import ProductDetail from "../Pages/AllProduct/ProductDetail";
 import UserDetails from "../Pages/UserManagement/UserDetails";
 import Brand from "../Pages/Brand/Brand";
+import Category from "../Pages/Category/Category";
 
 export const router = createBrowserRouter([
   {
@@ -70,6 +71,10 @@ export const router = createBrowserRouter([
               {
             path: "/brand",
             element: <Brand/>,
+          },
+                        {
+            path: "/category",
+            element: <Category/>,
           },
           {
             path: "/product-detail/:categoryId",

@@ -7,6 +7,7 @@ export const brandApi = createApi({
     baseUrl: BASE_URL,
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth.token;
+      console.log("Auth token in headers:", token);
       if (token) {
         headers.set("Authorization", token);
       }
@@ -15,41 +16,30 @@ export const brandApi = createApi({
   }),
   tagTypes: ["Brand"],
   endpoints: (builder) => ({
-    getAllBrands: builder.query({
-      query: () => "/brand/all-brands",
-      providesTags: ["Brand"],
-    }),
-    patchBrand: builder.mutation({
-      query: ({ id, ...patchData }) => ({
-        url: `/brand/update-brand/${id}`,
-        method: "PATCH",
-        body: patchData,
-      }),
-      invalidatesTags: ["Brand"],
-    }),
-    getBrandById: builder.query({
-      query: (id) => `brands/${id}`,
-      providesTags: ["Brand"],
-    }),
     createBrand: builder.mutation({
       query: (newBrand) => ({
-        url: "brands",
+        url: "/brand/create-brand",
         method: "POST",
         body: newBrand,
       }),
       invalidatesTags: ["Brand"],
     }),
-    updateBrand: builder.mutation({
-      query: ({ id, ...updatedData }) => ({
-        url: `brands/${id}`,
-        method: "PUT",
-        body: updatedData,
+    getAllBrands: builder.query({
+      query: () => "/brand/all-brands",
+      providesTags: ["Brand"],
+    }),
+    patchBrand: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `/brand/update-brand/${id}`,
+        method: "PATCH",
+        body: formData,
       }),
       invalidatesTags: ["Brand"],
     }),
+
     deleteBrand: builder.mutation({
       query: (id) => ({
-        url: `brands/${id}`,
+        url: `/brand/delete-brand/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Brand"],
@@ -58,10 +48,8 @@ export const brandApi = createApi({
 });
 
 export const {
-  useGetAllBrandsQuery,
-  useGetBrandByIdQuery,
   useCreateBrandMutation,
-  useUpdateBrandMutation,
+  useGetAllBrandsQuery,
   useDeleteBrandMutation,
-  usePatchBrandMutation
+  usePatchBrandMutation,
 } = brandApi;

@@ -1,120 +1,121 @@
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import {
-  useGetAllBrandsQuery,
-  usePatchBrandMutation,
-  useDeleteBrandMutation,
-  useCreateBrandMutation,
-} from "../../features/api/brandApi";
+  useCreateCategoryMutation,
+  useDeleteCategoryMutation,
+  useGetAllCategoriesQuery,
+  usePatchCategoryMutation,
+} from "../../features/api/categoryApi";
 import sampleImage from "../../assets/image/admin.jpg";
 
-function Brand() {
-  const [brands, setBrands] = useState([]);
+function Category() {
+  const [categories, setCategories] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState("edit"); // "edit" or "create"
-  const [selectedBrand, setSelectedBrand] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [formData, setFormData] = useState({ name: "", image: "" });
   const [imageFile, setImageFile] = useState(null);
 
-  const { data, isLoading, error } = useGetAllBrandsQuery();
-  const [patchBrand] = usePatchBrandMutation();
-  const [deleteBrand, { isLoading: isDeleting }] = useDeleteBrandMutation();
-  const [createBrand, { isLoading: isCreating }] = useCreateBrandMutation();
+  const { data, isLoading, error } = useGetAllCategoriesQuery();
+  const [patchCategory] = usePatchCategoryMutation();
+  const [deleteCategory] = useDeleteCategoryMutation();
+  const [createCategory] = useCreateCategoryMutation();
 
   useEffect(() => {
     if (data && data.data && Array.isArray(data.data.result)) {
-      setBrands(data.data.result);
+      setCategories(data.data.result);
     }
   }, [data]);
 
   const openCreateModal = () => {
     setModalType("create");
     setFormData({ name: "", image: "" });
-    setSelectedBrand(null);
+    setSelectedCategory(null);
     setIsModalOpen(true);
   };
 
-  const handleEdit = (brand) => {
+  const handleEdit = (category) => {
     setModalType("edit");
-    setSelectedBrand(brand);
+    setSelectedCategory(category);
     setFormData({
-      name: brand.name,
-      image: brand.brand_image || sampleImage,
+      name: category.name,
+      image: category.category_image || sampleImage,
     });
     setIsModalOpen(true);
   };
 
- const handleUpdate = async () => {
-  if (!selectedBrand) return;
-  try {
-    const formDataToSend = new FormData();
-    formDataToSend.append("name", formData.name);
-    if (imageFile) {
-      formDataToSend.append("brand_image", imageFile);
+  const handleUpdate = async () => {
+    if (!selectedCategory) return;
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      if (imageFile) {
+        formDataToSend.append("category_image", imageFile);
+      }
+
+      await patchCategory({
+        id: selectedCategory._id,
+        formData: formDataToSend,
+      }).unwrap();
+
+      setCategories((prev) =>
+        prev.map((c) =>
+          c._id === selectedCategory._id
+            ? { ...c, name: formData.name, category_image: formData.image }
+            : c
+        )
+      );
+      setIsModalOpen(false);
+      setImageFile(null);
+    } catch (err) {
+      console.error("Failed to update category:", err);
+      alert("Failed to update category. Please try again.");
     }
-
-    await patchBrand({ id: selectedBrand._id, formData: formDataToSend }).unwrap();
-
-
-    setBrands((prev) =>
-      prev.map((b) =>
-        b._id === selectedBrand._id
-          ? { ...b, name: formData.name, brand_image: formData.image }
-          : b
-      )
-    );
-    setIsModalOpen(false);
-    setImageFile(null);
-  } catch (err) {
-    console.error("Failed to update brand:", err);
-  }
-};
+  };
 
   const handleCreate = async () => {
-  try {
-    const formDataToSend = new FormData();
-    formDataToSend.append("name", formData.name);
-    if (imageFile) {
-      formDataToSend.append("brand_image", imageFile);
-    }
-
-    const newBrand = await createBrand(formDataToSend).unwrap();
-
-    const createdBrand = newBrand.data || newBrand.result || newBrand;
-
-    setBrands((prev) => [...prev, createdBrand]);
-    setIsModalOpen(false);
-    setImageFile(null);
-  } catch (err) {
-    console.error("Failed to create brand:", err);
-    alert("Failed to create brand. Please try again.");
-  }
-};
-
-  const handleDelete = async (brand) => {
-    // if (!window.confirm(`Are you sure you want to delete "${brand.name}"?`)) {
-    //   return;
-    // }
     try {
-      await deleteBrand(brand._id).unwrap();
-      setBrands((prev) => prev.filter((b) => b._id !== brand._id));
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      if (imageFile) {
+        formDataToSend.append("category_image", imageFile);
+      }
+
+      const newCategory = await createCategory(formDataToSend).unwrap();
+
+      const createdCategory =
+        newCategory.data || newCategory.result || newCategory;
+
+      setCategories((prev) => [...prev, createdCategory]);
+      setIsModalOpen(false);
+      setImageFile(null);
     } catch (err) {
-      console.error("Failed to delete brand:", err);
-      alert("Failed to delete brand. Please try again.");
+      console.error("Failed to create category:", err);
+      alert("Failed to create category. Please try again.");
+    }
+  };
+
+  const handleDelete = async (category) => {
+    try {
+      await deleteCategory(category._id).unwrap();
+      setCategories((prev) => prev.filter((c) => c._id !== category._id));
+    } catch (err) {
+      console.error("Failed to delete category:", err);
+      alert("Failed to delete category. Please try again.");
     }
   };
 
   const handleImageChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    setImageFile(file); // Save the file itself for sending to backend
-    setFormData({ ...formData, image: URL.createObjectURL(file) }); // For preview only
-  }
-};
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setFormData({ ...formData, image: URL.createObjectURL(file) });
+    }
+  };
 
-
-  if (isLoading) return <p className="mt-16">Loading brands...</p>;
-  if (error) return <p className="mt-16 text-red-500">Failed to load brands</p>;
+  if (isLoading) return <p className="mt-16">Loading categories...</p>;
+  if (error)
+    return <p className="mt-16 text-red-500">Failed to load categories</p>;
 
   return (
     <div className="h-[calc(100vh-80px)] mt-16">
@@ -123,7 +124,7 @@ function Brand() {
           onClick={openCreateModal}
           className="flex items-center gap-2 px-4 py-2 text-white bg-[#101749] rounded hover:bg-green-700"
         >
-          <FaPlus /> Create Brand
+          <FaPlus /> Create Category
         </button>
       </div>
 
@@ -138,27 +139,26 @@ function Brand() {
             </tr>
           </thead>
           <tbody>
-            {brands.map((brand, index) => (
-              <tr key={brand._id} className="border-b">
+            {categories.map((category, index) => (
+              <tr key={category._id} className="border-b">
                 <td className="px-4 py-3 text-black">{index + 1}</td>
-                <td className="px-4 py-3 text-black">{brand.name}</td>
+                <td className="px-4 py-3 text-black">{category.name}</td>
                 <td className="px-4 py-3">
                   <img
-                    src={brand.brand_image || sampleImage}
-                    alt={brand.name}
+                    src={category.category_image || sampleImage}
+                    alt={category.name}
                     className="object-fill w-20 rounded-md h-14"
                   />
                 </td>
                 <td className="flex items-center gap-4 px-4 py-3">
                   <button
-                    onClick={() => handleEdit(brand)}
+                    onClick={() => handleEdit(category)}
                     className="text-blue-500 hover:text-blue-700"
                   >
                     <FaEdit size={18} />
                   </button>
                   <button
-                    onClick={() => handleDelete(brand)}
-                    disabled={false}
+                    onClick={() => handleDelete(category)}
                     className="text-red-500 hover:text-red-700"
                   >
                     <FaTrash size={18} />
@@ -170,15 +170,15 @@ function Brand() {
         </table>
       </div>
 
-      {/* Modal for Create/Edit Brand */}
+      {/* Modal for Create/Edit Category */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="p-6 bg-white rounded-lg shadow-lg w-96">
             <h2 className="mb-4 text-xl font-bold">
-              {modalType === "create" ? "Create Brand" : "Edit Brand"}
+              {modalType === "create" ? "Create Category" : "Edit Category"}
             </h2>
 
-            <label className="block mb-2 font-medium">Brand Name</label>
+            <label className="block mb-2 font-medium">Category Name</label>
             <input
               type="text"
               value={formData.name}
@@ -188,7 +188,7 @@ function Brand() {
               className="w-full p-2 mb-4 border border-gray-300 rounded"
             />
 
-            <label className="block mb-2 font-medium">Brand Image</label>
+            <label className="block mb-2 font-medium">Category Image</label>
             <input
               type="file"
               accept="image/*"
@@ -213,10 +213,9 @@ function Brand() {
               {modalType === "create" ? (
                 <button
                   onClick={handleCreate}
-                  disabled={isCreating}
                   className="px-4 py-2 text-white bg-green-600 rounded"
                 >
-                  {isCreating ? "Creating..." : "Create"}
+                  Create
                 </button>
               ) : (
                 <button
@@ -234,4 +233,4 @@ function Brand() {
   );
 }
 
-export default Brand;
+export default Category;

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FiUser, FiLogOut } from "react-icons/fi";
 import { BiChevronDown } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
-import { MdDashboard, MdOutlineShoppingCart, MdPrivacyTip } from "react-icons/md";
+import { MdDashboard, MdOutlineBrandingWatermark, MdOutlineCategory, MdOutlineShoppingCart, MdPrivacyTip } from "react-icons/md";
 import { FaEdit, FaRegUser } from "react-icons/fa";
 import { RiTerminalWindowLine } from "react-icons/ri";
 import { PiUsers } from "react-icons/pi";
@@ -43,9 +43,14 @@ const Sidebar = ({ closeDrawer }) => {
       Link: "/all-products",
     },
                {
-      icon: <MdOutlineShoppingCart className="w-5 h-5" />,
+      icon: <MdOutlineBrandingWatermark className="w-5 h-5" />,
       label: "Brand",
       Link: "/brand",
+    },
+                   {
+      icon: <MdOutlineCategory className="w-5 h-5" />,
+      label: "Category",
+      Link: "/category",
     },
     {
       icon: <CiSettings className="w-5 h-5" />,
