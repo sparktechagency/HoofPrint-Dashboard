@@ -5,8 +5,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { MdDashboard, MdOutlineBrandingWatermark, MdOutlineCategory, MdOutlineShoppingCart, MdPrivacyTip } from "react-icons/md";
 import { FaEdit, FaRegUser } from "react-icons/fa";
 import { RiTerminalWindowLine } from "react-icons/ri";
-import { PiUsers } from "react-icons/pi";
-import { GrUserSettings } from "react-icons/gr";
 import { CiSettings, CiUser } from "react-icons/ci";
 import { BsArrowLeftRight } from "react-icons/bs";
 import { logout } from "../../features/slices/authSlice";

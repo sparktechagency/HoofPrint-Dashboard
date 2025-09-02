@@ -11,7 +11,7 @@ import sampleImage from "../../assets/image/admin.jpg";
 function Category() {
   const [categories, setCategories] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState("edit"); // "edit" or "create"
+  const [modalType, setModalType] = useState("edit"); 
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [formData, setFormData] = useState({ name: "", image: "" });
   const [imageFile, setImageFile] = useState(null);

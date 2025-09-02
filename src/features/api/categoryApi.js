@@ -23,7 +23,7 @@ export const categoryApi = createApi({
       query: (formData) => ({
         url: "/category/create-category",
         method: "POST",
-        body: formData, // send multipart/form-data
+        body: formData, 
       }),
       invalidatesTags: ["Category"],
     }),
@@ -31,7 +31,7 @@ export const categoryApi = createApi({
       query: ({ id, formData }) => ({
         url: `/category/update-category/${id}`,
         method: "PATCH",
-        body: formData, // multipart/form-data
+        body: formData, 
       }),
       invalidatesTags: ["Category"],
     }),
