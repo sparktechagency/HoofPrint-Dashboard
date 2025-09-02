@@ -18,7 +18,7 @@ const AboutUs = () => {
   return (
     <div className="container mx-auto">
       <div className="p-6 mt-5 bg-white rounded-lg md:p-10">
-        <h2 className="mb-6 text-2xl font-bold">About Us</h2>
+        <h2 className="my-6 text-2xl font-bold">About Us</h2>
         <div>
           <JoditEditor
            

@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useRef, useMemo } from "react";
 import JoditEditor from "jodit-react";
 
@@ -21,8 +17,8 @@ const PrivacyPolicy = () => {
 
   return (
     <div className="container mx-auto">
-      <div className="bg-white rounded-lg p-6 md:p-10 mt-5">
-        <h2 className="text-2xl font-bold mb-6">About Us</h2>
+      <div className="p-6 mt-5 bg-white rounded-lg md:p-10">
+        <h2 className="my-6 text-2xl font-bold"> Privacy Policy</h2>
         <div>
           <JoditEditor
             ref={editor}

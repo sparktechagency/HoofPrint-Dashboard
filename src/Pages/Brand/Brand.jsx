@@ -11,7 +11,7 @@ import sampleImage from "../../assets/image/admin.jpg";
 function Brand() {
   const [brands, setBrands] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState("edit"); // "edit" or "create"
+  const [modalType, setModalType] = useState("edit");
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [formData, setFormData] = useState({ name: "", image: "" });
   const [imageFile, setImageFile] = useState(null);

@@ -4,7 +4,7 @@ import JoditEditor from "jodit-react";
 const TermsCondition = () => {
   const editor = useRef(null);
   const [content, setContent] = useState("");
-  const [placeholder, setPlaceholder] = useState("Start typing..."); // Placeholder state
+  const [placeholder, setPlaceholder] = useState("Start typing..."); 
 
   const config = useMemo(
     () => ({
@@ -18,14 +18,14 @@ const TermsCondition = () => {
   return (
     <div className="container mx-auto">
       <div className="p-6 mt-5 bg-white rounded-lg md:p-10">
-        <h2 className="mb-6 text-2xl font-bold">About Us</h2>
+        <h2 className="my-6 text-2xl font-bold">Terms Condition</h2>
         <div>
           <JoditEditor
             ref={editor}
             value={content}
             config={config}
-            tabIndex={1} // tabIndex of textarea
-            onBlur={(newContent) => setContent(newContent)} // preferred to use only this option to update the content for performance reasons
+            tabIndex={1}  
+            onBlur={(newContent) => setContent(newContent)} 
             onChange={(newContent) => {}}
           />
                     <button className="w-full bg-[#101749] p-2 text-white mt-2 rounded-lg">Save</button>
