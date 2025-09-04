@@ -4,7 +4,7 @@ import JoditEditor from "jodit-react";
 const AboutUs = () => {
   const editor = useRef(null);
   const [content, setContent] = useState("");
-  const [placeholder, setPlaceholder] = useState("Start typing..."); // Placeholder state
+  const [placeholder, setPlaceholder] = useState("Start typing..."); 
 
   const config = useMemo(
     () => ({

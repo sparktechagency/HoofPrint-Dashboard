@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import {
   useGetAllBrandsQuery,
@@ -92,9 +92,7 @@ function Brand() {
 };
 
   const handleDelete = async (brand) => {
-    // if (!window.confirm(`Are you sure you want to delete "${brand.name}"?`)) {
-    //   return;
-    // }
+
     try {
       await deleteBrand(brand._id).unwrap();
       setBrands((prev) => prev.filter((b) => b._id !== brand._id));
@@ -107,8 +105,8 @@ function Brand() {
   const handleImageChange = (e) => {
   const file = e.target.files[0];
   if (file) {
-    setImageFile(file); // Save the file itself for sending to backend
-    setFormData({ ...formData, image: URL.createObjectURL(file) }); // For preview only
+    setImageFile(file); 
+    setFormData({ ...formData, image: URL.createObjectURL(file) }); 
   }
 };
 
