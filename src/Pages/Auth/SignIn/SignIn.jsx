@@ -30,7 +30,6 @@ const SignIn = () => {
       // Call login API
       const result = await logIn(values).unwrap();
 
-      // If successful, dispatch token to Redux and save user data to localStorage
       if (result?.data?.accessToken) {
         dispatch(setToken(result.data.accessToken));
         localStorage.setItem("user", JSON.stringify(result.data));
@@ -70,7 +69,6 @@ const SignIn = () => {
                   Please enter your email and password to continue
                 </Typography.Text>
               </div>
-
               {/* Email Field */}
               <Form.Item
                 name="email"
@@ -79,7 +77,6 @@ const SignIn = () => {
               >
                 <Input className="text-md" placeholder="Your Email" />
               </Form.Item>
-
               {/* Password Field with toggle visibility */}
               <Form.Item
                 name="password"

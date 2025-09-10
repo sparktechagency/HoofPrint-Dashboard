@@ -14,6 +14,7 @@ export const settingApi = createApi({
     },
   }),
   endpoints: (builder) => ({
+    // 🔹 Terms & Conditions endpoints
     getTermsConditions: builder.query({
       query: () => '/manage/get-terms-conditions',
     }),
@@ -24,10 +25,24 @@ export const settingApi = createApi({
         body: newTerms,
       }),
     }),
+
+    // 🔹 Privacy Policy endpoints
+    getPrivacyPolicy: builder.query({
+      query: () => '/manage/get-privacy-policy',
+    }),
+    addPrivacyPolicy: builder.mutation({
+      query: (newPolicy) => ({
+        url: '/manage/add-privacy-policy',
+        method: 'POST',
+        body: newPolicy,
+      }),
+    }),
   }),
 });
 
 export const {
   useGetTermsConditionsQuery,
   useAddTermsConditionsMutation,
+  useGetPrivacyPolicyQuery,
+  useAddPrivacyPolicyMutation,
 } = settingApi;

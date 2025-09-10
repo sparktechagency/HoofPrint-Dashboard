@@ -50,7 +50,6 @@ const VerifyCode = () => {
             We sent a reset link to <span className="font-medium text-gray-700">mehedi@gmail.com</span>
           </p>
           <p className="text-gray-500">Enter the 5-digit code mentioned in the email</p>
-
           <form onSubmit={handleVerify} className="mt-6">
             <div className="flex justify-center gap-2">
               {[0, 1, 2, 3, 4].map((index) => (

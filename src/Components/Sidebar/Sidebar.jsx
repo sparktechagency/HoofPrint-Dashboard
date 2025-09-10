@@ -106,12 +106,10 @@ const Sidebar = ({ closeDrawer }) => {
 
   return (
     <div className="flex flex-col h-full p-3 bg-white w-72">
-        <div className="mx-auto">
-            {/* <img src={brandlogo} alt="logo" className="" /> */}
-          </div>
+{/*      
       <div className="relative pt-8 mb-4 ml-6">
-      </div>
-      <div className="flex-1 overflow-y-auto max-h-[calc(100vh-150px)]">
+      </div> */}
+      <div className="flex-1 mt-16 overflow-y-auto max-h-[calc(100vh-150px)]">
         {filteredItems.map((item) => (
           <div key={item.label}>
             <div
@@ -130,7 +128,7 @@ const Sidebar = ({ closeDrawer }) => {
             >
               <Link to={item.Link} className="flex items-center w-full gap-3">
                 {item.icon}
-                <p>{item.label}</p>
+                {item.label}
                 {item.isDropdown && (
                   <BiChevronDown
                     className={`${

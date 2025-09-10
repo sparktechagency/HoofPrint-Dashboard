@@ -1,10 +1,46 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import JoditEditor from "jodit-react";
+import { message, ConfigProvider } from "antd";
+import {
+  useGetPrivacyPolicyQuery,
+  useAddPrivacyPolicyMutation,
+} from "../../../features/api/settingApi";
 
 const PrivacyPolicy = () => {
   const editor = useRef(null);
   const [content, setContent] = useState("");
-  const [placeholder, setPlaceholder] = useState("Start typing..."); // Placeholder state
+  const [placeholder, setPlaceholder] = useState("Start typing...");
+
+  // 🔹 RTK Query hooks
+  const { data, isLoading, isError } = useGetPrivacyPolicyQuery();
+  const [addPrivacyPolicy, { isLoading: isSaving, isSuccess, isError: saveError }] =
+    useAddPrivacyPolicyMutation();
+
+  // ✅ AntD message system
+  const [messageApi, contextHolder] = message.useMessage();
+
+  // 🔹 Prefill content when fetching existing policy
+  useEffect(() => {
+    if (data?.data?.description) {
+      setContent(data.data.description);
+    }
+  }, [data]);
+
+  // 🔹 Save handler
+  const handleSave = async () => {
+    if (!content) {
+      messageApi.info("Please enter privacy policy before saving.");
+      return;
+    }
+
+    try {
+      await addPrivacyPolicy({ description: content }).unwrap();
+      messageApi.success("Privacy policy saved successfully!");
+    } catch (err) {
+      const errorMessage = err?.message || "An unknown error occurred";
+      messageApi.error(`Failed to save privacy policy: ${errorMessage}`);
+    }
+  };
 
   const config = useMemo(
     () => ({
@@ -15,24 +51,34 @@ const PrivacyPolicy = () => {
     [placeholder]
   );
 
-  return (
-    <div className="container mx-auto">
-      <div className="p-6 mt-5 bg-white rounded-lg md:p-10">
-        <h2 className="my-6 text-2xl font-bold"> Privacy Policy</h2>
-        <div>
-          <JoditEditor
-            ref={editor}
-            value={content}
-            config={config}
-            tabIndex={1} // tabIndex of textarea
-            onBlur={(newContent) => setContent(newContent)} // preferred to use only this option to update the content for performance reasons
-            onChange={(newContent) => {}}
-          />
-                    <button className="w-full bg-[#101749] p-2 text-white mt-2 rounded-lg">Save</button>
+  if (isLoading) return <div>Loading current privacy policy...</div>;
+  if (isError) return <div>Error loading privacy policy.</div>;
 
+  return (
+    <ConfigProvider>
+      {contextHolder}
+      <div className="container mx-auto">
+        <div className="p-6 mt-5 bg-white rounded-lg md:p-10">
+          <h2 className="my-6 text-2xl font-bold">Privacy Policy</h2>
+          <div>
+            <JoditEditor
+              ref={editor}
+              value={content}
+              config={config}
+              tabIndex={1}
+              onBlur={(newContent) => setContent(newContent)}
+            />
+            <button
+              className="w-full bg-[#101749] p-2 text-white mt-2 rounded-lg"
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </ConfigProvider>
   );
 };
 

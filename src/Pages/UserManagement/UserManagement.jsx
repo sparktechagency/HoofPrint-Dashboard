@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { EyeOutlined } from "@ant-design/icons";
 import { IoIosArrowBack, IoIosArrowForward, IoMdClose } from "react-icons/io";
 import { MdBlock } from "react-icons/md";
 import { FaRegUser } from "react-icons/fa";
