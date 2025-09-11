@@ -137,14 +137,14 @@ const Sidebar = ({ closeDrawer }) => {
                 {item.subItems.map((subItem) => (
                   <Link to={subItem.Link} key={subItem.label}>
                     <div
-                      className={`py-2 px-5 cursor-pointer my-5 transition-all rounded-l-full ${
+                      className={` px-5 cursor-pointer transition-all rounded-l-full ${
                         active === subItem.label
                           ? "bg-[#101749] text-white font-semibold"
                           : "text-[#101749]"
                       }`}
                       onClick={() => setActive(subItem.label)}
                     >
-                      <p className="flex items-center gap-2">
+                      <p className="flex items-center py-2 gap-x-3">
                         {subItem.icon} {subItem.label}
                       </p>
                     </div>
@@ -157,10 +157,10 @@ const Sidebar = ({ closeDrawer }) => {
       </div>
       <button
         onClick={handleLogout}
-        className="flex items-center justify-center w-full py-3 mt-4 rounded-lg cursor-pointer "
+        className="flex items-center justify-center w-full rounded-lg cursor-pointer gap-x-2 "
       >
-        <FiLogOut className="text-xl" />
-        <p className="ml-2">Log out</p>
+        <FiLogOut />
+        <span>Log out</span>
       </button>
     </div>
   );

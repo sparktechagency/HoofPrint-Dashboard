@@ -1,213 +1,222 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
-import { FaCalendarAlt } from 'react-icons/fa'; 
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
-import { HiOutlineFolderOpen } from 'react-icons/hi';
+import React, { useState } from "react";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { FaTrash } from "react-icons/fa";
+import { Eye } from "lucide-react";
+import { useGetAllProductsQuery } from "../../features/api/productApi";
 
-const AllProducts = () => {
-  const navigate = useNavigate();
-  const [selectedCategory, setSelectedCategory] = useState("All Category");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("Sort By Price (low to High)");
+function AllProducts() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 14;
 
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
-  const [calendarVisible, setCalendarVisible] = useState(false); 
+  // Fetch all products
+  const { data, isLoading, isError, error } = useGetAllProductsQuery();
 
-  const productCategories = [
-    { id: 1, name: "Sodlar", products: 5, sale: 0, selltime: 2 },
-    { id: 2, name: "Hjalmor", products: 15, sale: 10, selltime: 6 },
-    { id: 3, name: "Sajjer", products: 16, sale: 10, selltime: 5 },
-  ];
+  if (isLoading) return <p>Loading products...</p>;
+  if (isError) return <p>Error loading products: {error.message}</p>;
 
-  const presets = [
-    "Last 24 hours",
-    "Last 7 days",
-    "Last 30 days",
-    "Custom Range",
-  ];
+  // ✅ Fix: products are inside data.data.result
+  const products = Array.isArray(data?.data?.result) ? data.data.result : [];
 
-  const handleViewProducts = (categoryId) => {
-    navigate(`/product-detail/${categoryId}`);
+  // Filtering
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination
+  const indexOfLastProduct = currentPage * pageSize;
+  const indexOfFirstProduct = indexOfLastProduct - pageSize;
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / pageSize);
+
+  const onPageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleViewProduct = (product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteProduct = (product) => {
+    alert("Delete functionality is not implemented yet.");
   };
 
   return (
-    <div className="min-h-screen mt-16 bg-gray-50">
-      <div className="p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900">All Products</h1>
-          <div className="text-sm text-gray-500 mr-96">
-            {/* Calendar Icon with Date Range Selection */}
-            <div className="relative flex items-center space-x-4">
-              <button
-                onClick={() => setCalendarVisible(!calendarVisible)} 
-                className="flex items-center text-blue-800"
-              >
-                <FaCalendarAlt className="mr-2" />
-                {`${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`}
-              </button>
-
-              {/* Conditionally render calendar popup */}
-              {calendarVisible && (
-                <div className="fixed inset-0 z-40 bg-black bg-opacity-30" onClick={() => setCalendarVisible(false)} />
-              )}
-              {calendarVisible && (
-                <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border rounded-md shadow-xl flex p-6 min-w-[700px]">
-                  <div className="grid grid-cols-2 gap-4 p-4">
-                    {/* From Date Picker */}
-                    <div>
-                      <label className="text-sm font-semibold text-black">From</label>
-                      <DatePicker
-                        selected={startDate}
-                        onChange={(date) => setStartDate(date)}
-                        dateFormat="MM/dd/yyyy"
-                        className="w-full px-3 py-2 mt-1 border"
-                      />
-                    </div>
-                    {/* To Date Picker */}
-                    <div>
-                      <label className="text-sm font-semibold text-black">To</label>
-                      <DatePicker
-                        selected={endDate}
-                        onChange={(date) => setEndDate(date)}
-                        dateFormat="MM/dd/yyyy"
-                        className="w-full px-3 py-2 mt-1 border"
-                      />
-                    </div>
-                    <div className="flex col-span-2 gap-6 mt-4">
-                      <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} inline />
-                      <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} inline />
-                    </div>
-                  </div>
-
-                  {/* Presets */}
-                  <div className="flex flex-col pl-4 border-l">
-                    {presets.map((item, idx) => (
-                      <button
-                        key={idx}
-                        className={`text-left px-4 py-2 hover:bg-gray-100 rounded-md text-sm ${
-                          item === "Custom Range" ? "bg-orange-100 font-semibold" : ""
-                        }`}
-                      >
-                        {item}
-                      </button>
-                    ))}
-                    <button
-                      className="px-4 py-2 mt-auto text-white bg-blue-900 rounded-md"
-                      onClick={() => setCalendarVisible(false)}
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="flex gap-4 mb-8">
-          {/* Category Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 pr-8 text-sm bg-white border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option>All Category</option>
-              <option>Sodlar</option>
-              <option>Hjalmor</option>
-              <option>Sajjer</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Search Input */}
-          <div className="relative flex-1 max-w-md">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
+    <>
+      <div className="h-[calc(100vh-80px)] mt-16">
+        <div className="flex justify-between p-4">
+          <div className="w-72">
             <input
               type="text"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full py-2 pl-10 pr-4 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 rounded-md"
             />
           </div>
-
-          {/* Sort Dropdown */}
-          <div className="relative">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2 pr-8 text-sm bg-white border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option>Sort By Price (low to High)</option>
-              <option>Sort By Price (High to low)</option>
-              <option>Sort By Name (A to Z)</option>
-              <option>Sort By Name (Z to A)</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
         </div>
 
-        {/* Product Categories Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {productCategories.map((category, index) => (
-            <div
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#101749] mb-4">
+              <tr className="text-white">
+                <th className="px-4 py-3 text-left">Serial</th>
+                <th className="px-4 py-3 text-left">Image</th>
+                <th className="px-4 py-3 text-left">Name</th>
+                <th className="px-4 py-3 text-left">Price</th>
+                <th className="px-4 py-3 text-left">Stock</th>
+                <th className="px-4 py-3 text-left">Color</th>
+                <th className="px-4 py-3 text-left">Category</th>
+                <th className="px-4 py-3 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentProducts.length > 0 ? (
+                currentProducts.map((product, index) => (
+                  <tr key={product._id}>
+                    {/* Serial Number calculation */}
+                    <td className="px-4 text-black">
+                      {(currentPage - 1) * pageSize + index + 1}
+                    </td>
+                    <td className="px-4 text-black">
+                      <img
+                        src={product.images[0]}
+                        alt="Product"
+                        className="object-cover w-10 h-10 my-2 rounded"
+                      />
+                    </td>
+                    <td className="px-4 text-black">{product.name}</td>
+                    <td className="px-4 text-black">${product.price}</td>
+                    <td className="px-4 text-black">{product.stoke}</td>
+                    <td className="px-4 text-black">{product.color}</td>
+                    <td className="px-4 text-black">
+                      {product.category?.name}
+                    </td>
+                    <td className="">
+                      <button
+                        className="ml-8"
+                        onClick={() => handleViewProduct(product)}
+                      >
+                        <Eye size={18} />
+                      </button>
+                      {/* <button onClick={() => handleDeleteProduct(product)}>
+                        <FaTrash size={18} color="red" />
+                      </button> */}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="p-4 text-center text-gray-500">
+                    No products found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex justify-center py-4">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50"
+            disabled={currentPage === 1}
+          >
+            <IoIosArrowBack size={20} />
+          </button>
+          {[...Array(totalPages)].map((_, index) => (
+            <button
               key={index}
-              className="p-6 transition-shadow bg-white border border-gray-200 rounded-lg hover:shadow-md"
+              onClick={() => onPageChange(index + 1)}
+              className={`px-3 py-1 mx-1 rounded-full ${
+                currentPage === index + 1
+                  ? "text-white bg-[#101749]"
+                  : "bg-transparent text-black"
+              }`}
             >
-              {/* Folder Icon */}
-              <div className="mb-4">
-                <HiOutlineFolderOpen size={50} />
-              </div>
-
-              {/* Category Name */}
-              <h3 className="mb-3 text-lg font-semibold text-gray-900">{category.name}</h3>
-
-              {/* Statistics */}
-              <div className="mb-4 space-y-1 text-sm text-gray-600">
-                <div>Products {category.products}</div>
-                <div>Sale {category.sale}</div>
-                <div>Avg. Sell Time {category.selltime} days</div>
-              </div>
-
-              {/* View Products Link */}
-              <button
-                onClick={() => handleViewProducts(category.id)}
-                className="flex items-center gap-1 text-sm font-medium text-blue-600 transition-colors hover:text-blue-800"
-              >
-                View Products
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
+              {index + 1}
+            </button>
           ))}
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50"
+            disabled={currentPage === totalPages}
+          >
+            <IoIosArrowForward size={20} />
+          </button>
         </div>
       </div>
-    </div>
+
+      {/* Modal */}
+      {isModalOpen && selectedProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-50">
+          <div className="w-3/4 p-6 bg-white rounded-lg max-w-[800px] flex flex-col">
+            <div className="flex flex-col items-center justify-center">
+              <h2 className="text-2xl font-semibold">{selectedProduct.name}</h2>
+            <p > <strong>Description:</strong>{selectedProduct.description}</p>
+            </div>
+            <div className="mt-4">
+              <p>
+                <strong>Price:</strong> ${selectedProduct.price}
+              </p>
+              <p>
+                <strong>Stock:</strong> {selectedProduct.stoke}
+              </p>
+              <p>
+                <strong>Color:</strong> {selectedProduct.color}
+              </p>
+              <p>
+                <strong>Size:</strong> {selectedProduct.size}
+              </p>
+              <p>
+                <strong>Category:</strong> {selectedProduct.category?.name}
+              </p>
+              <p>
+                <strong>Delivery Options:</strong>{" "}
+                {selectedProduct.deliveryOption.join(", ")}
+              </p>
+              <p>
+                <strong>Shipping Charge:</strong> $
+                {selectedProduct.shippingCharge}
+              </p>
+            </div>
+
+            {/* Image Gallery */}
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold">Images</h3>
+              <div className="flex mt-2 space-x-4 overflow-x-auto">
+                {selectedProduct.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`Product Image ${index + 1}`}
+                    className="object-cover w-32 h-32 rounded-md"
+                  />
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="px-4 py-2 mt-4 text-white bg-gray-800 rounded-md"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
-};
+}
 
 export default AllProducts;

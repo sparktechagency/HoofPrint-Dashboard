@@ -5,6 +5,8 @@ import { userApi } from "./api/userApi.js";
 import { brandApi } from "./api/brandApi.js";
 import { categoryApi } from "./api/categoryApi.js";
 import { settingApi } from "./api/settingApi.js";
+import { productApi } from "./api/productApi.js";
+import { dashboardApi } from "./api/dashboardApi.js";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +16,8 @@ export const store = configureStore({
     [brandApi.reducerPath]: brandApi.reducer,
     [categoryApi.reducerPath]:categoryApi.reducer,
     [settingApi.reducerPath]:settingApi.reducer,
+    [productApi.reducerPath]:productApi.reducer,
+    [dashboardApi.reducerPath]:dashboardApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -21,6 +25,8 @@ export const store = configureStore({
       userApi.middleware,
       brandApi.middleware,
       categoryApi.middleware,
-      settingApi.middleware
+      settingApi.middleware,
+      productApi.middleware,
+      dashboardApi.middleware
     ),
 });

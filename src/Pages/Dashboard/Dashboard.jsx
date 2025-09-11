@@ -3,8 +3,11 @@ import UsersTable from "../../Components/Dashboard/UsersTable";
 import ProductOverview from "../../Components/Dashboard/ProductOverview";
 import { FaUsers } from "react-icons/fa";
 import { FaCartShopping } from "react-icons/fa6";
+import { useGetMetaDataQuery } from "../../features/api/dashboardApi";
 
 const Dashboard = () => {
+  //  const {data, isLoading, isError} = useGetMetaDataQuery()
+
   return (
     <div className="min-h-screen">
       <div className="container p-4 mx-auto ">

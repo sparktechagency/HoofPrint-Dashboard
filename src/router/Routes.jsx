@@ -13,9 +13,6 @@ import VerifyCode from "../Pages/Auth/VerifyCode/VerifyCode";
 import TransectionHistory from "../Pages/TransectionHistory/TransectionHistory";
 import AllProduct from "../Pages/AllProduct/AllProduct";
 import UpdatePassword from "../Pages/Auth/UpdatePassword/UpdatePassword";
-import ProductList from "../Pages/AllProduct/ProductDetail";
-import AllProducts from "../Pages/AllProduct/AllProduct";
-import ProductDetail from "../Pages/AllProduct/ProductDetail";
 import UserDetails from "../Pages/UserManagement/UserDetails";
 import Brand from "../Pages/Brand/Brand";
 import Category from "../Pages/Category/Category";
@@ -76,10 +73,7 @@ export const router = createBrowserRouter([
             path: "/category",
             element: <Category/>,
           },
-          {
-            path: "/product-detail/:categoryId",
-            element: <ProductDetail/>,
-          },
+
           {
             path: "/settings/about-us",
             element: <AboutUs />,
