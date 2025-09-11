@@ -2,7 +2,13 @@ import { useState } from "react";
 import { FiUser, FiLogOut } from "react-icons/fi";
 import { BiChevronDown } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
-import { MdDashboard, MdOutlineBrandingWatermark, MdOutlineCategory, MdOutlineShoppingCart, MdPrivacyTip } from "react-icons/md";
+import {
+  MdDashboard,
+  MdOutlineBrandingWatermark,
+  MdOutlineCategory,
+  MdOutlineShoppingCart,
+  MdPrivacyTip,
+} from "react-icons/md";
 import { FaEdit, FaRegUser } from "react-icons/fa";
 import { RiTerminalWindowLine } from "react-icons/ri";
 import { CiSettings, CiUser } from "react-icons/ci";
@@ -10,12 +16,11 @@ import { BsArrowLeftRight } from "react-icons/bs";
 import { logout } from "../../features/slices/authSlice";
 import { useDispatch } from "react-redux";
 
-
 const Sidebar = ({ closeDrawer }) => {
   const [active, setActive] = useState("Dashboard");
   const [openDropdown, setOpenDropdown] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-   const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const menuItems = [
@@ -25,27 +30,27 @@ const Sidebar = ({ closeDrawer }) => {
       Link: "/",
     },
     {
-      icon: <FaRegUser  className="w-5 h-5" />,
+      icon: <FaRegUser className="w-5 h-5" />,
 
       label: "User Details",
       Link: "/user-management",
     },
-        {
-      icon: <BsArrowLeftRight  className="w-5 h-5" />,
+    {
+      icon: <BsArrowLeftRight className="w-5 h-5" />,
       label: "Transection History",
       Link: "/transection-history",
     },
-            {
+    {
       icon: <MdOutlineShoppingCart className="w-5 h-5" />,
       label: "All Products",
       Link: "/all-products",
     },
-               {
+    {
       icon: <MdOutlineBrandingWatermark className="w-5 h-5" />,
       label: "Brand",
       Link: "/brand",
     },
-                   {
+    {
       icon: <MdOutlineCategory className="w-5 h-5" />,
       label: "Category",
       Link: "/category",
@@ -75,40 +80,29 @@ const Sidebar = ({ closeDrawer }) => {
       ],
     },
   ];
-
-  // Filter the menu items based on the search term
   const filterMenuItems = (items) => {
     return items.filter((item) => {
-      // If the item has subItems, filter them as well
       if (item.isDropdown && item.subItems) {
         const filteredSubItems = item.subItems.filter((subItem) =>
           subItem.label.toLowerCase().includes(searchTerm.toLowerCase())
         );
-        // If a subItem matches the search term, we include the parent dropdown
         if (filteredSubItems.length > 0) {
           item.subItems = filteredSubItems;
           return true;
         }
       }
-      // Filter the label of the item
       return item.label.toLowerCase().includes(searchTerm.toLowerCase());
     });
   };
 
   const filteredItems = filterMenuItems(menuItems);
-
-
-    const handleLogout = () => {
-    localStorage.removeItem("user");        
-    dispatch(logout());                     
-    navigate("/sign-in");                    
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    dispatch(logout());
+    navigate("/sign-in");
   };
-
   return (
     <div className="flex flex-col h-full p-3 bg-white w-72">
-{/*      
-      <div className="relative pt-8 mb-4 ml-6">
-      </div> */}
       <div className="flex-1 mt-16 overflow-y-auto max-h-[calc(100vh-150px)]">
         {filteredItems.map((item) => (
           <div key={item.label}>
@@ -161,12 +155,13 @@ const Sidebar = ({ closeDrawer }) => {
           </div>
         ))}
       </div>
-     
-        <button onClick={handleLogout} className="flex items-center justify-center w-full py-3 mt-4 rounded-lg cursor-pointer ">
-          <FiLogOut className="text-xl" />
-          <p className="ml-2">Log out</p>
-        </button>
-     
+      <button
+        onClick={handleLogout}
+        className="flex items-center justify-center w-full py-3 mt-4 rounded-lg cursor-pointer "
+      >
+        <FiLogOut className="text-xl" />
+        <p className="ml-2">Log out</p>
+      </button>
     </div>
   );
 };
