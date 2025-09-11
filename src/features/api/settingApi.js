@@ -37,6 +37,16 @@ export const settingApi = createApi({
         body: newPolicy,
       }),
     }),
+    getAboutUs:builder.query({
+       query: () => '/manage/get-about-us',
+    }),
+    addAboutUs:builder.mutation({
+       query:(newabout)=>({
+         url:'/manage/add-about-us',
+         method:'POST',
+         body:newabout,
+       })
+    })
   }),
 });
 
@@ -45,4 +55,6 @@ export const {
   useAddTermsConditionsMutation,
   useGetPrivacyPolicyQuery,
   useAddPrivacyPolicyMutation,
+  useGetAboutUsQuery,
+  useAddAboutUsMutation
 } = settingApi;
