@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Chart, registerables } from "chart.js";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { CalendarDays } from "lucide-react";
+import { useGetUserChartDataQuery } from "../../features/api/dashboardApi";
 
 Chart.register(...registerables);
 
@@ -10,32 +8,30 @@ function UserOverviewChart() {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
+  // ✅ Selected year state
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+  // ✅ Pass year as query param to API
+  const { data, isLoading, isError } = useGetUserChartDataQuery(selectedYear);
+
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current || isLoading || isError) return;
     if (chartInstance.current) chartInstance.current.destroy();
 
     const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
 
-    const data = {
-      labels: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sept",
-        "Oct",
-        "Nov",
-        "Dec",
-      ],
+    // Extract months & user counts from API
+    const chartData = data?.data?.chartData || [];
+    const labels = chartData.map((item) => item.month);
+    const users = chartData.map((item) => item.totalUser);
+
+    const chartConfig = {
+      labels,
       datasets: [
         {
           label: "Users",
-          data: [85, 80, 75, 65, 40, 45, 60, 75, 95, 85, 90, 75],
+          data: users,
           fill: true,
           backgroundColor: function (context) {
             const chart = context.chart;
@@ -46,15 +42,17 @@ function UserOverviewChart() {
             gradient.addColorStop(1, "rgba(16, 23, 73, 1)");
             return gradient;
           },
+          borderColor: "#101749",
           tension: 0.4,
-          pointRadius: 0,
+          pointRadius: 3,
+          pointBackgroundColor: "#101749",
         },
       ],
     };
 
     chartInstance.current = new Chart(ctx, {
       type: "line",
-      data,
+      data: chartConfig,
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -73,9 +71,8 @@ function UserOverviewChart() {
         scales: {
           y: {
             beginAtZero: true,
-            max: 100,
             grid: { color: "rgba(255, 255, 255, 0.1)" },
-            ticks: { color: "#101749", font: { size: 12 }, stepSize: 20 },
+            ticks: { color: "#101749", font: { size: 12 } },
           },
           x: {
             grid: { display: false },
@@ -86,124 +83,44 @@ function UserOverviewChart() {
     });
 
     return () => chartInstance.current?.destroy();
-  }, []);
+  }, [data, isLoading, isError]);
+
+  if (isLoading) {
+    return <p className="mt-10 text-center">Loading chart...</p>;
+  }
+
+  if (isError) {
+    return <p className="mt-10 text-center text-red-500">Failed to load chart</p>;
+  }
+
+  // ✅ Extract years dropdown from API
+  const yearsDropdown = data?.data?.yearsDropdown || [new Date().getFullYear()];
 
   return (
-    <div className="w-full h-[250px]">
-      <canvas ref={chartRef} />
-    </div>
-  );
-}
-
-// ---------------------------
-// Main Dashboard Component
-// ---------------------------
-function DashboardPage() {
-  const [startDate, setStartDate] = useState(new Date("2025-06-16"));
-  const [endDate, setEndDate] = useState(new Date("2025-09-10"));
-  const [showCalendar, setShowCalendar] = useState(false);
-
-  const presets = [
-    "Last 24 hours",
-    "Last 7 days",
-    "Last 30 days",
-    "Custom Range",
-  ];
-
-  return (
-    <div className="container relative p-4 mx-auto">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-medium text-black">
-            Total User Overview
-          </h2>
-
-          <div className="flex items-center gap-6">
-            {/* Calendar Trigger */}
-            <button
-              onClick={() => setShowCalendar(!showCalendar)}
-              className="flex items-center px-4 py-2 text-sm text-black border border-black rounded-md"
-            >
-              <CalendarDays className="w-5 h-5 mr-2" />
-              {startDate?.toLocaleDateString()} to{" "}
-              {endDate?.toLocaleDateString()}
-            </button>
-          </div>
-        </div>
-
-        {/* Chart */}
-        <UserOverviewChart />
+    <div className="w-full">
+      {/* Year Dropdown */}
+      <div className="flex justify-between mb-4">
+         <h2 className="text-2xl font-medium text-black">Total User Overview</h2>
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
+          // className="px-3 py-2 text-sm border border-gray-400 rounded-md"
+          className="px-3 py-2 text-sm border rounded-md"
+        >
+          {yearsDropdown.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* Calendar Popup */}
-      {showCalendar && (
-        <>
-          {/* Overlay */}
-          <div
-            className="fixed inset-0 z-40 bg-black bg-opacity-30"
-            onClick={() => setShowCalendar(false)}
-          />
-
-          {/* Centered Popup */}
-          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border rounded-md shadow-xl flex p-6 min-w-[700px]">
-            {/* Date Inputs & Calendar */}
-            <div className="grid grid-cols-2 gap-4 p-4">
-              <div>
-                <label className="text-sm font-semibold text-black">From</label>
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  dateFormat="dd-MM-yyyy"
-                  className="w-full px-3 py-2 mt-1 border"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-black">To</label>
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  dateFormat="dd-MM-yyyy"
-                  className="w-full px-3 py-2 mt-1 border"
-                />
-              </div>
-              <div className="flex col-span-2 gap-6 mt-4">
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  inline
-                />
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  inline
-                />
-              </div>
-            </div>
-
-            {/* Presets */}
-            <div className="flex flex-col pl-4 border-l">
-              {presets.map((item, idx) => (
-                <button
-                  key={idx}
-                  className={`text-left px-4 py-2 hover:bg-gray-100 rounded-md text-sm ${
-                    item === "Custom Range" ? "bg-orange-100 font-semibold" : ""
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
-              <button
-                className="px-4 py-2 mt-auto text-white bg-blue-900 rounded-md"
-                onClick={() => setShowCalendar(false)}
-              >
-                Apply
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+      {/* Chart */}
+      <div className="w-full h-[250px]">
+        <canvas ref={chartRef} />
+      </div>
     </div>
   );
 }
 
-export default DashboardPage;
+export default UserOverviewChart;
