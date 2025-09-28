@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import {
   useCreateCategoryMutation,
@@ -11,10 +11,14 @@ import sampleImage from "../../assets/image/admin.jpg";
 function Category() {
   const [categories, setCategories] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState("edit"); 
+  const [modalType, setModalType] = useState("edit");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [formData, setFormData] = useState({ name: "", image: "" });
   const [imageFile, setImageFile] = useState(null);
+
+  // NEW: filtering state
+  const [searchTerm, setSearchTerm] = useState("");
+  const searchDebounceRef = useRef(null);
 
   const { data, isLoading, error } = useGetAllCategoriesQuery();
   const [patchCategory] = usePatchCategoryMutation();
@@ -61,7 +65,12 @@ function Category() {
       setCategories((prev) =>
         prev.map((c) =>
           c._id === selectedCategory._id
-            ? { ...c, name: formData.name, category_image: formData.image }
+            ? {
+                ...c,
+                name: formData.name,
+                // NOTE: the server returns the actual file URL. This line only updates preview
+                category_image: imageFile ? formData.image : c.category_image,
+              }
             : c
         )
       );
@@ -82,9 +91,7 @@ function Category() {
       }
 
       const newCategory = await createCategory(formDataToSend).unwrap();
-
-      const createdCategory =
-        newCategory.data || newCategory.result || newCategory;
+      const createdCategory = newCategory.data || newCategory.result || newCategory;
 
       setCategories((prev) => [...prev, createdCategory]);
       setIsModalOpen(false);
@@ -113,19 +120,45 @@ function Category() {
     }
   };
 
+  // Debounced search setter
+  const onSearchChange = (e) => {
+    const value = e.target.value;
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      setSearchTerm(value);
+    }, 250);
+  };
+
+  // Derived filtered list (case-insensitive by name)
+  const filteredCategories = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return categories;
+    return categories.filter((c) => (c?.name || "").toLowerCase().includes(term));
+  }, [categories, searchTerm]);
+
   if (isLoading) return <p className="mt-16">Loading categories...</p>;
-  if (error)
-    return <p className="mt-16 text-red-500">Failed to load categories</p>;
+  if (error) return <p className="mt-16 text-red-500">Failed to load categories</p>;
 
   return (
     <div className="h-[calc(100vh-80px)] mt-16">
-      <div className="flex justify-end mb-4">
+      {/* Header actions */}
+      <div className="flex flex-col justify-between gap-3 mb-4 sm:flex-row">
         <button
           onClick={openCreateModal}
-          className="flex items-center gap-2 px-4 py-2 text-white bg-[#101749] rounded hover:bg-green-700"
+          className="flex items-center gap-2 px-4 py-2 text-white rounded bg-[#101749] hover:opacity-90"
         >
           <FaPlus /> Create Category
         </button>
+
+        {/* NEW: Filter by category name */}
+        <div className="w-full sm:w-80">
+          <input
+            type="text"
+            placeholder="Filter by category name…"
+            onChange={onSearchChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#101749]"
+          />
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -135,11 +168,13 @@ function Category() {
               <th className="px-4 py-3 text-left">ID</th>
               <th className="px-4 py-3 text-left">Name</th>
               <th className="px-4 py-3 text-left">Image</th>
+              <th className="px-4 py-3 text-left">Total Products</th>
+              <th className="px-4 py-3 text-left">Total Products Sold</th>
               <th className="px-4 py-3 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
-            {categories.map((category, index) => (
+            {filteredCategories.map((category, index) => (
               <tr key={category._id} className="border-b">
                 <td className="px-4 py-3 text-black">{index + 1}</td>
                 <td className="px-4 py-3 text-black">{category.name}</td>
@@ -150,6 +185,8 @@ function Category() {
                     className="object-fill w-20 rounded-md h-14"
                   />
                 </td>
+                <td className="px-4 py-3 text-black">{category.totalProducts}</td>
+                <td className="px-4 py-3 text-black">{category.totalProductsSold}</td>
                 <td className="flex items-center gap-4 px-4 py-3">
                   <button
                     onClick={() => handleEdit(category)}
@@ -166,13 +203,21 @@ function Category() {
                 </td>
               </tr>
             ))}
+
+            {filteredCategories.length === 0 && (
+              <tr>
+                <td className="px-4 py-6 text-center text-gray-500" colSpan={6}>
+                  No categories match your filter.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Modal for Create/Edit Category */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50">
           <div className="p-6 bg-white rounded-lg shadow-lg w-96">
             <h2 className="mb-4 text-xl font-bold">
               {modalType === "create" ? "Create Category" : "Edit Category"}
@@ -182,46 +227,26 @@ function Category() {
             <input
               type="text"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full p-2 mb-4 border border-gray-300 rounded"
             />
 
             <label className="block mb-2 font-medium">Category Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="mb-4"
-            />
+            <input type="file" accept="image/*" onChange={handleImageChange} className="mb-4" />
             {formData.image && (
-              <img
-                src={formData.image}
-                alt="Preview"
-                className="object-cover w-24 h-24 mb-4 rounded"
-              />
+              <img src={formData.image} alt="Preview" className="object-cover w-24 h-24 mb-4 rounded" />
             )}
 
             <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 text-white bg-gray-400 rounded"
-              >
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-white bg-gray-400 rounded">
                 Cancel
               </button>
               {modalType === "create" ? (
-                <button
-                  onClick={handleCreate}
-                  className="px-4 py-2 text-white bg-green-600 rounded"
-                >
+                <button onClick={handleCreate} className="px-4 py-2 text-white bg-green-600 rounded">
                   Create
                 </button>
               ) : (
-                <button
-                  onClick={handleUpdate}
-                  className="px-4 py-2 text-white bg-blue-500 rounded"
-                >
+                <button onClick={handleUpdate} className="px-4 py-2 text-white bg-blue-500 rounded">
                   Update
                 </button>
               )}

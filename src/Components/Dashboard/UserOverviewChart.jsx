@@ -1,126 +1,207 @@
-import React, { useEffect, useRef, useState } from "react";
+// src/pages/dashboard/UserOverviewChart.jsx
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Chart, registerables } from "chart.js";
+import { CalendarDays } from "lucide-react"; // optional; if not installed, remove the icon
 import { useGetUserChartDataQuery } from "../../features/api/dashboardApi";
 
 Chart.register(...registerables);
 
-function UserOverviewChart() {
+// Simple date helpers
+const toISO = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : d);
+const addDays = (d, days) => {
+  const x = new Date(d);
+  x.setDate(x.getDate() + days);
+  return x;
+};
+const formatPretty = (d) =>
+  new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(d));
+
+export default function UserOverviewChart() {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
-  // ✅ Selected year state
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  // Default: last 90 days (adjust if you prefer)
+  const today = new Date();
+  const [startDate, setStartDate] = useState(toISO(addDays(today, -90)));
+  const [endDate, setEndDate] = useState(toISO(today));
 
-  // ✅ Pass year as query param to API
-  const { data, isLoading, isError } = useGetUserChartDataQuery(selectedYear);
+  // Fetch server data using startDate & endDate (same as product chart)
+  const { data, isLoading, isError, isFetching, error } = useGetUserChartDataQuery(
+    { startDate, endDate },
+    { refetchOnMountOrArgChange: true }
+  );
+
+  // Normalize response shapes:
+  const chartData = useMemo(() => {
+    const raw =
+      data?.data?.chartData ??
+      data?.chartData ??
+      data?.data ??
+      data ??
+      [];
+    return Array.isArray(raw) ? raw : [];
+  }, [data]);
+
+  // Accept multiple keys from API for label/value
+  const labels = useMemo(
+    () => chartData.map((d) => d.month ?? d.label ?? d.name ?? d.week ?? ""),
+    [chartData]
+  );
+  const values = useMemo(
+    () => chartData.map((d) => d.totalUser ?? d.totalUsers ?? d.count ?? d.value ?? 0),
+    [chartData]
+  );
 
   useEffect(() => {
     if (!chartRef.current || isLoading || isError) return;
-    if (chartInstance.current) chartInstance.current.destroy();
 
-    const ctx = chartRef.current.getContext("2d");
+    // Destroy any existing chart first
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+      chartInstance.current = null;
+    }
+
+    const canvas = chartRef.current;
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Extract months & user counts from API
-    const chartData = data?.data?.chartData || [];
-    const labels = chartData.map((item) => item.month);
-    const users = chartData.map((item) => item.totalUser);
+    const height = canvas.clientHeight || 260;
 
-    const chartConfig = {
-      labels,
-      datasets: [
-        {
-          label: "Users",
-          data: users,
-          fill: true,
-          backgroundColor: function (context) {
-            const chart = context.chart;
-            const ctx = chart.ctx;
-            const gradient = ctx.createLinearGradient(0, 0, 0, chart.height);
-            gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
-            gradient.addColorStop(0.8, "rgba(16, 23, 73, 1)");
-            gradient.addColorStop(1, "rgba(16, 23, 73, 1)");
-            return gradient;
-          },
-          borderColor: "#101749",
-          tension: 0.4,
-          pointRadius: 3,
-          pointBackgroundColor: "#101749",
-        },
-      ],
-    };
+    // Dark-to-light vertical gradient (like your mock)
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    // top: light; bottom: deep blue
+    gradient.addColorStop(0, "rgba(138, 145, 170, 0.45)"); // soft light grey-blue
+    gradient.addColorStop(1, "rgba(11, 19, 73, 1)");       // deep navy #0B1349
 
     chartInstance.current = new Chart(ctx, {
       type: "line",
-      data: chartConfig,
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Users",
+            data: values,
+            fill: true,
+            backgroundColor: gradient,
+            borderColor: "#0B1349",
+            borderWidth: 2,
+            tension: 0.45,
+            pointRadius: 0, // hidden points like in the mock
+            pointHoverRadius: 3,
+          },
+        ],
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: false,
         plugins: {
           legend: { display: false },
           tooltip: {
             mode: "index",
             intersect: false,
-            backgroundColor: "#101749",
-            titleColor: "#fffdff",
-            bodyColor: "#fffdff",
-            borderColor: "#fffdff",
-            borderWidth: 1,
+            backgroundColor: "#0B1349",
+            titleColor: "#FFFFFF",
+            bodyColor: "#FFFFFF",
+            borderWidth: 0,
           },
         },
         scales: {
-          y: {
-            beginAtZero: true,
-            grid: { color: "rgba(255, 255, 255, 0.1)" },
-            ticks: { color: "#101749", font: { size: 12 } },
-          },
           x: {
             grid: { display: false },
-            ticks: { color: "#101749", font: { size: 12 } },
+            ticks: {
+              color: "#000000",
+              font: { size: 12 },
+            },
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: "rgba(0,0,0,0.08)" },
+            ticks: {
+              color: "#000000",
+              font: { size: 12 },
+              // make the left scale match the mock look
+              padding: 6,
+            },
           },
         },
       },
     });
 
-    return () => chartInstance.current?.destroy();
-  }, [data, isLoading, isError]);
+    return () => {
+      chartInstance.current?.destroy();
+      chartInstance.current = null;
+    };
+  }, [labels, values, isLoading, isError, startDate, endDate]);
 
-  if (isLoading) {
-    return <p className="mt-10 text-center">Loading chart...</p>;
-  }
-
-  if (isError) {
-    return <p className="mt-10 text-center text-red-500">Failed to load chart</p>;
-  }
-
-  // ✅ Extract years dropdown from API
-  const yearsDropdown = data?.data?.yearsDropdown || [new Date().getFullYear()];
+  // UI states
+  if (isLoading) return <p className="mt-6 text-center">Loading chart…</p>;
+  if (isError)
+    return (
+      <p className="mt-6 text-center text-red-600">
+        Failed to load chart{error?.status ? ` (HTTP ${error.status})` : ""}.
+      </p>
+    );
 
   return (
     <div className="w-full">
-      {/* Year Dropdown */}
-      <div className="flex justify-between mb-4">
-         <h2 className="text-2xl font-medium text-black">Total User Overview</h2>
-        <select
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-          // className="px-3 py-2 text-sm border border-gray-400 rounded-md"
-          className="px-3 py-2 text-sm border rounded-md"
-        >
-          {yearsDropdown.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
+      {/* Header + Date range pill */}
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-[15px] font-semibold text-black">Total User Overview</h3>
+
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-3 py-1.5 text-sm border rounded-md">
+            {/* If you don't use lucide-react, remove this span */}
+            <span className="text-gray-500">
+              <CalendarDays size={16} />
+            </span>
+            <span className="text-gray-700 whitespace-nowrap">
+              {formatPretty(startDate)} to {formatPretty(endDate)}
+            </span>
+          </div>
+
+          {/* Hidden native inputs to keep the design clean but functional */}
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => {
+              const v = e.target.value;
+              setStartDate(v);
+              if (v && endDate && new Date(v) > new Date(endDate)) {
+                setEndDate(v);
+              }
+            }}
+            className="px-2 py-1 text-sm border rounded-md"
+          />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => {
+              const v = e.target.value;
+              setEndDate(v);
+              if (v && startDate && new Date(v) < new Date(startDate)) {
+                setStartDate(v);
+              }
+            }}
+            className="px-2 py-1 text-sm border rounded-md"
+          />
+        </div>
       </div>
 
       {/* Chart */}
-      <div className="w-full h-[250px]">
-        <canvas ref={chartRef} />
-      </div>
+      {chartData.length === 0 ? (
+        <div className="py-10 text-center text-gray-500 border rounded-md">
+          No data for this range.
+        </div>
+      ) : (
+        <div className="w-full h-[260px] rounded-md overflow-hidden">
+          <canvas ref={chartRef} />
+        </div>
+      )}
     </div>
   );
 }
-
-export default UserOverviewChart;

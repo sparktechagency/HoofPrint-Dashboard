@@ -16,6 +16,7 @@ import UpdatePassword from "../Pages/Auth/UpdatePassword/UpdatePassword";
 import UserDetails from "../Pages/UserManagement/UserDetails";
 import Brand from "../Pages/Brand/Brand";
 import Category from "../Pages/Category/Category";
+import UserProductsPage from "../Pages/UserManagement/UserProductsPage";
 
 export const router = createBrowserRouter([
   {
@@ -53,9 +54,13 @@ export const router = createBrowserRouter([
             path: "/user-management",
             element: <UserManagement />,
           },
-              {
+                  {
+            path: "/users/:id/products",
+            element: <UserProductsPage />,
+          },
+          {
             path: "/user-details",
-            element: <UserDetails/>,
+            element: <UserDetails />,
           },
           {
             path: "/transection-history",
@@ -63,15 +68,15 @@ export const router = createBrowserRouter([
           },
           {
             path: "/all-products",
-            element: <AllProduct/>,
+            element: <AllProduct />,
           },
-              {
+          {
             path: "/brand",
-            element: <Brand/>,
+            element: <Brand />,
           },
-                        {
+          {
             path: "/category",
-            element: <Category/>,
+            element: <Category />,
           },
 
           {

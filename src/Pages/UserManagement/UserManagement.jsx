@@ -1,163 +1,235 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward, IoMdClose } from "react-icons/io";
-import { MdBlock } from "react-icons/md";
+import { MdBlock, MdProductionQuantityLimits } from "react-icons/md";
 import { FaRegUser } from "react-icons/fa";
 import userImage from "../../assets/image/admin.jpg";
 import { useNavigate } from "react-router-dom";
 import { useGetAllUsersQuery } from "../../features/api/userApi";
 
+function formatCurrencyBDT(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+    return "৳0";
+  }
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "BDT",
+      maximumFractionDigits: 0,
+    }).format(Number(value));
+  } catch (e) {
+    return `৳${Number(value).toLocaleString()}`;
+  }
+}
+
+function debounce(fn, delay = 300) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
+
 function UserManagement() {
   const [filteredUsers, setFilteredUsers] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalBlock, setIsModalBlock] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 14;
   const navigate = useNavigate();
-  const timeoutRef = useRef(null);
+  const searchInputRef = useRef(null);
 
-  const { data, error, isLoading } = useGetAllUsersQuery();
+  const { data, error, isLoading, isFetching } = useGetAllUsersQuery();
 
-  // console.log(data)
-  const apiUsers = data?.data?.result || [];
+  const apiUsers = useMemo(() => data?.data?.result || [], [data]);
 
+  // Normalize API users into the shape the table needs
+  const normalize = (users) =>
+    users.map((user, index) => ({
+      id: user?._id || `${index + 1}`,
+      serial: index + 1, // for stable display
+      name: user?.name || "Unknown",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      location: user?.address || "Unknown",
+      avatar: user?.profile_image || userImage,
+      totalPurchase: Number(user?.totalPurchase || 0),
+      totalSales: Number(user?.totalSales || 0),
+      createdAt: user?.createdAt || "",
+      updatedAt: user?.updatedAt || "",
+      raw: user,
+    }));
 
+  // Initial / refresh load
   useEffect(() => {
-    if (apiUsers.length > 0) {
-      const formattedUsers = apiUsers.map((user, index) => ({
-        id: `${index + 1}`,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        location: user.address || "Unknown",
-        avatar: user.profile_image || userImage,
-      }));
-      setFilteredUsers(formattedUsers);
-    }
-  }, [data]);
+    setFilteredUsers(normalize(apiUsers));
+  }, [apiUsers]);
 
-  const handleSearch = (e) => {
+  // Debounced search
+  const runSearch = useMemo(
+    () =>
+      debounce((term) => {
+        if (!term?.trim()) {
+          setFilteredUsers(normalize(apiUsers));
+          setCurrentPage(1);
+          return;
+        }
+        const lower = term.toLowerCase();
+        const filtered = apiUsers.filter((u) => {
+          const name = (u?.name || "").toLowerCase();
+          const email = (u?.email || "").toLowerCase();
+          const phone = (u?.phone || "").toLowerCase();
+          const address = (u?.address || "").toLowerCase();
+          return (
+            name.includes(lower) ||
+            email.includes(lower) ||
+            phone.includes(lower) ||
+            address.includes(lower)
+          );
+        });
+        setFilteredUsers(normalize(filtered));
+        setCurrentPage(1);
+      }, 300),
+    [apiUsers]
+  );
+
+  const handleSearchInput = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      if (term.trim() === "") {
-        const formattedUsers = apiUsers.map((user, index) => ({
-          id: `#${index + 1}`,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          location: user.address || "Unknown",
-          avatar: user.profile_image || userImage,
-        }));
-        setFilteredUsers(formattedUsers);
-      } else {
-        const filtered = apiUsers
-          .filter(
-            (user) =>
-              user.name.toLowerCase().includes(term.toLowerCase()) ||
-              user.email.toLowerCase().includes(term.toLowerCase())
-          )
-          .map((user, index) => ({
-            id: `${index + 1}`,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            location: user.address || "Unknown",
-            avatar: user.profile_image || userImage,
-          }));
-        setFilteredUsers(filtered);
-      }
-      setCurrentPage(1);
-    }, 300);
+    runSearch(term);
   };
 
   const indexOfLastUser = currentPage * pageSize;
   const indexOfFirstUser = indexOfLastUser - pageSize;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.ceil(filteredUsers.length / pageSize);
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
 
   const onPageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
 
-  const handleViewUser = (user) => {
-    navigate(`/user-details/${user.id}`, { state: { user } });
-  };
+  // const handleViewUser = (user) => {
+  //   // Navigate to details page with full user payload in state
+  //   navigate(`/user-details/${user.id}`, { state: { user: user.raw || user } });
+  // };
+
+  const handleViewUserProduct = (user) => {
+  const userId = user?.raw?._id || user?._id || user?.id; // use your normalized object
+  navigate(`/users/${userId}/products`, { state: { user: user.raw || user } });
+};
 
   const handleBlockUser = (user) => {
     setSelectedUser(user);
     setIsModalBlock(true);
   };
 
-  if (isLoading) {
-    return <div className="mt-10 text-center">Loading...</div>;
+  if (error) {
+    return (
+      <div className="mt-10 text-center text-red-600">
+        Failed to load users. Please try again.
+      </div>
+    );
   }
 
   return (
     <>
       <div className="h-[calc(100vh-80px)] mt-16">
         {/* Header with search */}
-        <div className="flex justify-end p-4">
+        <div className="flex items-center justify-between p-4">
+          <h1 className="text-lg font-semibold text-[#101749]">User Management</h1>
           <div className="w-72">
             <input
+              ref={searchInputRef}
               type="text"
-              placeholder="Search..."
+              placeholder="Search by name, email, phone, or address"
               value={searchTerm}
-              onChange={handleSearch}
-              className="w-full px-4 py-2 rounded-md"
+              onChange={handleSearchInput}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#101749]"
             />
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto ">
+        <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#101749] ">
+            <thead className="bg-[#101749]">
               <tr className="text-white">
                 <th className="px-4 py-3 text-left">Serial</th>
                 <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3 text-left">Location</th>
                 <th className="px-4 py-3 text-left">Email</th>
-                <th className="px-4 py-3 text-left">Phone Number</th>
-                <th className="px-4 py-3 text-left">Status</th>
+                <th className="px-4 py-3 text-left">Phone</th>
+                <th className="px-4 py-3 text-left">Total Purchase</th>
+                <th className="px-4 py-3 text-left">Total Sales</th>
+                <th className="px-4 py-3 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {currentUsers.map((user, index) => (
-                <tr key={index}>
-                  <td className="px-4 text-black">{user.id}</td>
-                  <td className="px-4 text-black">
+              {(isLoading || isFetching) && (
+                <tr>
+                  <td className="px-4 py-6 text-center text-gray-500" colSpan={8}>
+                    Loading users...
+                  </td>
+                </tr>
+              )}
+
+              {!isLoading && !isFetching && currentUsers.length === 0 && (
+                <tr>
+                  <td className="px-4 py-6 text-center text-gray-500" colSpan={8}>
+                    No users found.
+                  </td>
+                </tr>
+              )}
+
+              {currentUsers.map((user, idx) => (
+                <tr key={user.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 text-black">
+                    {indexOfFirstUser + idx + 1}
+                  </td>
+                  <td className="px-4 py-3 text-black">
                     <div className="flex items-center gap-2">
-                      {/* <img
-                        src={user.avatar}
-                        alt="User Avatar"
-                        className="object-cover w-10 h-10 rounded-full"
-                      /> */}
-                      <p>{user.name}</p>
+                      {/* If you want the avatar, uncomment below */}
+                      {/* <img src={user.avatar} alt="User Avatar" className="object-cover w-8 h-8 rounded-full" /> */}
+                      <p className="font-medium">{user.name}</p>
                     </div>
                   </td>
-                  <td className="px-4 text-black">{user.location}</td>
-                  <td className="px-4 text-black">{user.email}</td>
-                  <td className="px-4 text-black">{user.phone}</td>
-                  <td className="flex px-4 py-3 space-x-4">
-                    <button
-                      onClick={() => handleBlockUser(user)}
-                      className="text-[#101749] hover:text-red-300"
-                    >
-                      <MdBlock size={20} />
-                    </button>
-                    <button
-                      onClick={() => handleViewUser(user)}
-                      className="text-[#101749] hover:text-red-300"
-                    >
-                      <FaRegUser size={20} />
-                    </button>
+                  <td className="px-4 py-3 text-black">{user.location}</td>
+                  <td className="px-4 py-3 text-black">{user.email}</td>
+                  <td className="px-4 py-3 text-black">{user.phone}</td>
+                  <td className="px-4 py-3 text-black">
+                    {user.totalPurchase}
+                  </td>
+                  <td className="px-4 py-3 text-black">
+                    {user.totalSales}
+                  </td>
+                  <td className="px-4 py-3 text-black">
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => handleBlockUser(user)}
+                        className="p-1 rounded text-[#101749] hover:bg-[#101749]/10"
+                        title="Block user"
+                        aria-label={`Block ${user.name}`}
+                      >
+                        <MdBlock size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleViewUser(user)}
+                        className="p-1 rounded text-[#101749] hover:bg-[#101749]/10"
+                        title="View details"
+                        aria-label={`View ${user.name}`}
+                      >
+                        <FaRegUser size={18} />
+                      </button>
+                        <button
+                        onClick={() => handleViewUserProduct(user)}
+                        className="p-1 rounded text-[#101749] hover:bg-[#101749]/10"
+                        title="View details"
+                        aria-label={`View ${user.name}`}
+                      >
+                        <MdProductionQuantityLimits size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -166,105 +238,93 @@ function UserManagement() {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center py-4">
-          <button
-            onClick={() => onPageChange(currentPage - 1)}
-            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50"
-            disabled={currentPage === 1}
-          >
-            <IoIosArrowBack size={20} />
-          </button>
-          {[...Array(totalPages)].map((_, index) => (
+        {filteredUsers.length > 0 && (
+          <div className="flex items-center justify-center gap-1 py-4">
             <button
-              key={index}
-              onClick={() => onPageChange(index + 1)}
-              className={`px-3 py-1 mx-1 rounded-full ${
-                currentPage === index + 1
-                  ? "text-white bg-[#101749]"
-                  : "bg-transparent text-black"
-              }`}
+              onClick={() => onPageChange(currentPage - 1)}
+              className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-40 hover:bg-gray-100"
+              disabled={currentPage === 1}
+              aria-label="Previous page"
             >
-              {index + 1}
+              <IoIosArrowBack size={20} />
             </button>
-          ))}
-          <button
-            onClick={() => onPageChange(currentPage + 1)}
-            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50"
-            disabled={currentPage === totalPages}
-          >
-            <IoIosArrowForward size={20} />
-          </button>
-        </div>
-      </div>
-
-      {/* Modal for user details */}
-      {isModalOpen && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md p-4 overflow-hidden bg-white rounded-md">
-            <div className="relative">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
-                onClick={() => setIsModalOpen(false)}
-                className="absolute p-1 text-white rounded-full right-2 top-2 bg-white/10 hover:bg-white/20"
+                key={page}
+                onClick={() => onPageChange(page)}
+                className={`px-3 py-1 mx-1 rounded-full border ${
+                  currentPage === page
+                    ? "text-white bg-[#101749] border-[#101749]"
+                    : "bg-transparent text-black border-transparent hover:bg-gray-100"
+                }`}
+                aria-current={currentPage === page ? "page" : undefined}
               >
-                <IoMdClose />
+                {page}
               </button>
-              <div className="bg-[#52B5D1] p-6 text-center rounded-md">
-                <div className="w-24 h-24 mx-auto mb-4 overflow-hidden border-4 border-white rounded-full">
-                  <img src={selectedUser.avatar} className="object-cover w-full h-full" />
-                </div>
-                <h2 className="text-xl font-bold text-white">
-                  {selectedUser.name}
-                </h2>
-              </div>
-              <div className="p-6">
-                <div className="flex flex-col gap-4">
-                  <div className="flex justify-between">
-                    <div className="w-2/3">
-                      <h3 className="font-bold text-black ">Email</h3>
-                      <p className="text-gray-700">{selectedUser.email}</p>
-                    </div>
-                    <div className="w-1/3">
-                      <h3 className="font-bold text-black">Account Type</h3>
-                      <p className="text-gray-700">{selectedUser.accType || "N/A"}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <div className="w-2/3">
-                      <h3 className="font-bold text-black">Date Joined</h3>
-                      <p className="text-gray-700">{selectedUser.date || "Unknown"}</p>
-                    </div>
-                    <div className="w-1/3">
-                      <h3 className="font-bold text-black">Location</h3>
-                      <p className="text-gray-700">{selectedUser.location}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            ))}
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-40 hover:bg-gray-100"
+              disabled={currentPage === totalPages}
+              aria-label="Next page"
+            >
+              <IoIosArrowForward size={20} />
+            </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Modal for block user */}
       {isModalBlock && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md overflow-hidden bg-white rounded-md">
+          <div className="w-full max-w-md overflow-hidden bg-white rounded-md shadow-xl">
             <div className="relative">
               <button
                 onClick={() => setIsModalBlock(false)}
-                className="absolute p-1 rounded-full right-2 top-2 bg-white/10 hover:bg-white/20"
+                className="absolute p-1 rounded-full right-2 top-2 hover:bg-gray-100"
+                aria-label="Close"
               >
                 <IoMdClose />
               </button>
-              <div className="flex flex-col items-center justify-center py-12 space-y-4 px-11">
-                <h2 className="text-xl font-bold text-[#101749]">
-                  Are You Sure You Want to Block?
+              <div className="flex flex-col items-center justify-center px-10 py-10 space-y-4">
+                <h2 className="text-xl font-bold text-[#101749] text-center">
+                  Are you sure you want to block this user?
                 </h2>
-                <p>Do you want to Block this user profile?</p>
-                <button className="bg-[#101749] py-3 px-8 rounded-md font-semibold text-white">
-                  Confirm
-                </button>
+                <div className="w-full p-4 text-sm rounded bg-gray-50">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Name</span>
+                    <span className="font-medium">{selectedUser.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Email</span>
+                    <span className="font-medium">{selectedUser.email}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Purchase</span>
+                    <span className="font-medium">{formatCurrencyBDT(selectedUser.totalPurchase)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Sales</span>
+                    <span className="font-medium">{formatCurrencyBDT(selectedUser.totalSales)}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    className="bg-[#101749] py-2 px-6 rounded-md font-semibold text-white"
+                    onClick={() => {
+
+                      setIsModalBlock(false);
+                    }}
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    className="px-6 py-2 font-semibold text-[#101749] border border-[#101749] rounded-md"
+                    onClick={() => setIsModalBlock(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           </div>

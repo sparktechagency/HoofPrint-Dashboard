@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { FaTrash } from "react-icons/fa";
 import { Eye } from "lucide-react";
 import { useGetAllProductsQuery } from "../../features/api/productApi";
 
@@ -8,36 +7,53 @@ function AllProducts() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(""); // NEW
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 14;
 
-  // Fetch all products
   const { data, isLoading, isError, error } = useGetAllProductsQuery();
 
-  if (isLoading) return <p>Loading products...</p>;
-  if (isError) return <p>Error loading products: {error.message}</p>;
+  if (isLoading) return <p className="mt-16 text-center">Loading products...</p>;
+  if (isError) return <p className="mt-16 text-center text-red-600">Error loading products: {String(error?.message || error?.status || "Unknown error")}</p>;
 
-  // ✅ Fix: products are inside data.data.result
+  // products are inside data.data.result
   const products = Array.isArray(data?.data?.result) ? data.data.result : [];
 
-  // Filtering
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Build unique, sorted category list for the dropdown
+  const categoryOptions = useMemo(() => {
+    const set = new Set(
+      products
+        .map((p) => p?.category?.name)
+        .filter(Boolean)
+        .map((s) => String(s))
+    );
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [products]);
+
+  // Filtering (by search + category)
+  const filteredProducts = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return products.filter((p) => {
+      const matchesSearch =
+        !q ||
+        p?.name?.toLowerCase().includes(q) ||
+        p?.category?.name?.toLowerCase().includes(q);
+
+      const matchesCategory =
+        !categoryFilter || p?.category?.name === categoryFilter;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchTerm, categoryFilter]);
 
   // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
   const indexOfLastProduct = currentPage * pageSize;
   const indexOfFirstProduct = indexOfLastProduct - pageSize;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
-
-  const totalPages = Math.ceil(filteredProducts.length / pageSize);
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
   const onPageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
 
@@ -46,28 +62,51 @@ function AllProducts() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteProduct = (product) => {
-    alert("Delete functionality is not implemented yet.");
+  // When filters change, reset to page 1
+  const onSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+  const onCategoryChange = (e) => {
+    setCategoryFilter(e.target.value);
+    setCurrentPage(1);
   };
 
   return (
     <>
       <div className="h-[calc(100vh-80px)] mt-16">
-        <div className="flex justify-between p-4">
-          <div className="w-72">
+        {/* Filters row */}
+        <div className="flex flex-col items-start justify-between gap-3 p-4 sm:flex-row">
+          <div className="w-full sm:w-72">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search by name or category…"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 rounded-md"
+              onChange={onSearchChange}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#101749]"
             />
+          </div>
+
+          <div className="w-full sm:w-72">
+            <select
+              value={categoryFilter}
+              onChange={onCategoryChange}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#101749]"
+            >
+              <option value="">All categories</option>
+              {categoryOptions.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
+        {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#101749] mb-4">
+            <thead className="bg-[#101749]">
               <tr className="text-white">
                 <th className="px-4 py-3 text-left">Serial</th>
                 <th className="px-4 py-3 text-left">Image</th>
@@ -82,41 +121,43 @@ function AllProducts() {
             <tbody>
               {currentProducts.length > 0 ? (
                 currentProducts.map((product, index) => (
-                  <tr key={product._id}>
-                    {/* Serial Number calculation */}
+                  <tr key={product._id} className="border-b">
                     <td className="px-4 text-black">
                       {(currentPage - 1) * pageSize + index + 1}
                     </td>
                     <td className="px-4 text-black">
                       <img
-                        src={product.images[0]}
+                        src={product?.images?.[0] || ""}
                         alt="Product"
-                        className="object-cover w-10 h-10 my-2 rounded"
+                        className="object-cover w-10 h-10 my-2 bg-gray-100 rounded"
+                        onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
                       />
                     </td>
-                    <td className="px-4 text-black">{product.name}</td>
-                    <td className="px-4 text-black">${product.price}</td>
-                    <td className="px-4 text-black">{product.stoke}</td>
-                    <td className="px-4 text-black">{product.color}</td>
+                    <td className="px-4 text-black">{product?.name}</td>
                     <td className="px-4 text-black">
-                      {product.category?.name}
+                      {product?.price != null ? `$${product.price}` : "N/A"}
                     </td>
-                    <td className="">
+                    <td className="px-4 text-black">
+                      {/* backend field looks like 'stoke'; keep as-is */}
+                      {product?.stoke ?? product?.stock ?? "N/A"}
+                    </td>
+                    <td className="px-4 text-black">{product?.color ?? "—"}</td>
+                    <td className="px-4 text-black">{product?.category?.name ?? "—"}</td>
+                    <td className="px-4 text-black">
                       <button
-                        className="ml-8"
+                        className="p-1 ml-2 rounded hover:bg-gray-100"
                         onClick={() => handleViewProduct(product)}
+                        title="View"
+                        aria-label="View"
                       >
                         <Eye size={18} />
                       </button>
-                      {/* <button onClick={() => handleDeleteProduct(product)}>
-                        <FaTrash size={18} color="red" />
-                      </button> */}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="p-4 text-center text-gray-500">
+                  <td colSpan="8" className="p-6 text-center text-gray-500">
                     No products found.
                   </td>
                 </tr>
@@ -126,92 +167,83 @@ function AllProducts() {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center py-4">
-          <button
-            onClick={() => onPageChange(currentPage - 1)}
-            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50"
-            disabled={currentPage === 1}
-          >
-            <IoIosArrowBack size={20} />
-          </button>
-          {[...Array(totalPages)].map((_, index) => (
+        {totalPages > 1 && (
+          <div className="flex justify-center py-4">
             <button
-              key={index}
-              onClick={() => onPageChange(index + 1)}
-              className={`px-3 py-1 mx-1 rounded-full ${
-                currentPage === index + 1
-                  ? "text-white bg-[#101749]"
-                  : "bg-transparent text-black"
-              }`}
+              onClick={() => onPageChange(currentPage - 1)}
+              className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50 hover:bg-gray-100"
+              disabled={currentPage === 1}
             >
-              {index + 1}
+              <IoIosArrowBack size={20} />
             </button>
-          ))}
-          <button
-            onClick={() => onPageChange(currentPage + 1)}
-            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50"
-            disabled={currentPage === totalPages}
-          >
-            <IoIosArrowForward size={20} />
-          </button>
-        </div>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => onPageChange(page)}
+                className={`px-3 py-1 mx-1 rounded-full ${
+                  currentPage === page
+                    ? "text-white bg-[#101749]"
+                    : "bg-transparent text-black hover:bg-gray-100"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50 hover:bg-gray-100"
+              disabled={currentPage === totalPages}
+            >
+              <IoIosArrowForward size={20} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Modal */}
       {isModalOpen && selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-50">
-          <div className="w-3/4 p-6 bg-white rounded-lg max-w-[800px] flex flex-col">
-            <div className="flex flex-col items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/50">
+          <div className="w-11/12 max-w-[800px] p-6 bg-white rounded-lg">
+            <div className="flex flex-col items-center">
               <h2 className="text-2xl font-semibold">{selectedProduct.name}</h2>
-            <p > <strong>Description:</strong>{selectedProduct.description}</p>
-            </div>
-            <div className="mt-4">
-              <p>
-                <strong>Price:</strong> ${selectedProduct.price}
-              </p>
-              <p>
-                <strong>Stock:</strong> {selectedProduct.stoke}
-              </p>
-              <p>
-                <strong>Color:</strong> {selectedProduct.color}
-              </p>
-              <p>
-                <strong>Size:</strong> {selectedProduct.size}
-              </p>
-              <p>
-                <strong>Category:</strong> {selectedProduct.category?.name}
-              </p>
-              <p>
-                <strong>Delivery Options:</strong>{" "}
-                {selectedProduct.deliveryOption.join(", ")}
-              </p>
-              <p>
-                <strong>Shipping Charge:</strong> $
-                {selectedProduct.shippingCharge}
+              <p className="mt-1 text-center">
+                <strong>Description:</strong> {selectedProduct.description || "—"}
               </p>
             </div>
 
-            {/* Image Gallery */}
+            <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-2">
+              <p><strong>Price:</strong> {selectedProduct.price != null ? `$${selectedProduct.price}` : "N/A"}</p>
+              <p><strong>Stock:</strong> {selectedProduct.stoke ?? selectedProduct.stock ?? "N/A"}</p>
+              <p><strong>Color:</strong> {selectedProduct.color || "—"}</p>
+              <p><strong>Size:</strong> {selectedProduct.size || "—"}</p>
+              <p><strong>Category:</strong> {selectedProduct.category?.name || "—"}</p>
+              <p><strong>Delivery Options:</strong> {Array.isArray(selectedProduct.deliveryOption) ? selectedProduct.deliveryOption.join(", ") : "—"}</p>
+              <p><strong>Shipping Charge:</strong> {selectedProduct.shippingCharge != null ? `$${selectedProduct.shippingCharge}` : "—"}</p>
+            </div>
+
             <div className="mt-4">
               <h3 className="text-lg font-semibold">Images</h3>
-              <div className="flex mt-2 space-x-4 overflow-x-auto">
-                {selectedProduct.images.map((image, index) => (
+              <div className="flex mt-2 space-x-3 overflow-x-auto">
+                {(selectedProduct.images || []).map((img, i) => (
                   <img
-                    key={index}
-                    src={image}
-                    alt={`Product Image ${index + 1}`}
-                    className="object-cover w-32 h-32 rounded-md"
+                    key={i}
+                    src={img}
+                    alt={`Product ${i + 1}`}
+                    className="object-cover w-32 h-32 bg-gray-100 rounded-md"
+                    onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
                   />
                 ))}
               </div>
             </div>
 
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 mt-4 text-white bg-gray-800 rounded-md"
-            >
-              Close
-            </button>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 mt-4 text-white bg-gray-800 rounded-md"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
