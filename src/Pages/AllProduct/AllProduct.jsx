@@ -195,49 +195,88 @@ function AllProducts() {
       </div>
 
       {/* Modal */}
-      {isModalOpen && selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/50">
-          <div className="w-11/12 max-w-[800px] p-6 bg-white rounded-lg">
-            <div className="flex flex-col items-center">
-              <h2 className="text-2xl font-semibold">{selectedProduct.name}</h2>
-              <p className="mt-1 text-center">
-                <strong>Description:</strong> {selectedProduct.description || "—"}
-              </p>
-            </div>
-            <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-2">
-              <p><strong>Price:</strong> {selectedProduct.price != null ? `$${selectedProduct.price}` : "N/A"}</p>
-              <p><strong>Stock:</strong> {selectedProduct.stoke ?? selectedProduct.stock ?? "N/A"}</p>
-              <p><strong>Color:</strong> {selectedProduct.color || "—"}</p>
-              <p><strong>Size:</strong> {selectedProduct.size || "—"}</p>
-              <p><strong>Category:</strong> {selectedProduct.category?.name || "—"}</p>
-              <p><strong>Delivery Options:</strong> {Array.isArray(selectedProduct.deliveryOption) ? selectedProduct.deliveryOption.join(", ") : "—"}</p>
-              <p><strong>Shipping Charge:</strong> {selectedProduct.shippingCharge != null ? `$${selectedProduct.shippingCharge}` : "—"}</p>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold">Images</h3>
-              <div className="flex mt-2 space-x-3 overflow-x-auto">
-                {(selectedProduct.images || []).map((img, i) => (
-                  <img
-                    key={i}
-                    src={img}
-                    alt={`Product ${i + 1}`}
-                    className="object-cover w-32 h-32 bg-gray-100 rounded-md"
-                    onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 mt-4 text-white bg-gray-800 rounded-md"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+     {isModalOpen && selectedProduct && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="relative w-11/12 max-w-3xl p-6 bg-white shadow-xl rounded-2xl">
+      {/* Close button */}
+      <button
+        onClick={() => setIsModalOpen(false)}
+        className="absolute text-gray-500 top-4 right-4 hover:text-black"
+      >
+        ✕
+      </button>
+
+      {/* Header */}
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-[#101749]">
+          {selectedProduct.name}
+        </h2>
+        {selectedProduct.category?.name && (
+          <span className="inline-block px-3 py-1 mt-2 text-sm text-white rounded-full bg-[#101749]">
+            {selectedProduct.category.name}
+          </span>
+        )}
+      </div>
+
+      {/* Description */}
+      {selectedProduct.description && (
+        <p className="px-2 mt-4 overflow-y-auto text-center text-gray-600 max-h-24">
+          {selectedProduct.description}
+        </p>
       )}
+
+      {/* Info grid */}
+      <div className="grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2">
+        <p><strong>Price:</strong> {selectedProduct.price != null ? `$${selectedProduct.price}` : "N/A"}</p>
+        <p><strong>Stock:</strong> {selectedProduct.stoke ?? selectedProduct.stock ?? "N/A"}</p>
+        <p><strong>Color:</strong> {selectedProduct.color || "—"}</p>
+        <p><strong>Size:</strong> {selectedProduct.size || "—"}</p>
+        <p><strong>Delivery Options:</strong> 
+          {Array.isArray(selectedProduct.deliveryOption) && selectedProduct.deliveryOption.length > 0 
+            ? selectedProduct.deliveryOption.join(", ") 
+            : "—"}
+        </p>
+        <p><strong>Shipping Charge:</strong> {selectedProduct.shippingCharge != null ? `$${selectedProduct.shippingCharge}` : "—"}</p>
+      </div>
+
+      {/* Image gallery */}
+      <div className="mt-6">
+        <h3 className="mb-2 text-lg font-semibold">Product Images</h3>
+        {selectedProduct.images?.length > 0 ? (
+          <div className="flex gap-3 overflow-x-auto">
+            {selectedProduct.images.map((img, i) => (
+              <div
+                key={i}
+                className="flex-shrink-0 w-32 h-32 overflow-hidden bg-gray-100 rounded-lg"
+              >
+                <img
+                  src={img}
+                  alt={`Product ${i + 1}`}
+                  className="object-cover w-full h-full transition-transform duration-200 hover:scale-110"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No images available</p>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="flex justify-end mt-6">
+        <button
+          onClick={() => setIsModalOpen(false)}
+          className="px-5 py-2 text-white bg-[#101749] rounded-lg hover:bg-[#0c1236] transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </>
   );
 }

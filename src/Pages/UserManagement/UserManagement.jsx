@@ -1,11 +1,14 @@
 // src/pages/users/UserManagement.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward, IoMdClose } from "react-icons/io";
-import { MdBlock, MdProductionQuantityLimits } from "react-icons/md";
+import { MdBlock, MdLockOpen, MdProductionQuantityLimits } from "react-icons/md";
 import { Eye } from "lucide-react";
 import userImage from "../../assets/image/admin.jpg";
 import { useNavigate } from "react-router-dom";
-import { useGetAllUsersQuery } from "../../features/api/userApi";
+import {
+  useGetAllUsersQuery,
+  useToggleBlockUserMutation,
+} from "../../features/api/userApi";
 
 function debounce(fn, delay = 300) {
   let timer;
@@ -36,7 +39,7 @@ const fmtDateTime = (iso) => {
 function UserManagement() {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isModalBlock, setIsModalBlock] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // 👈 details modal
+  const [isModalOpen, setIsModalOpen] = useState(false); // details modal
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,6 +49,8 @@ function UserManagement() {
   const searchInputRef = useRef(null);
 
   const { data, error, isLoading, isFetching } = useGetAllUsersQuery();
+  const [toggleBlockUser, { isLoading: isBlocking }] =
+    useToggleBlockUserMutation();
 
   const apiUsers = useMemo(() => data?.data?.result || [], [data]);
 
@@ -63,6 +68,7 @@ function UserManagement() {
       totalSales: Number(user?.totalSales || 0),
       createdAt: user?.createdAt || "",
       updatedAt: user?.updatedAt || "",
+      isBlocked: user?.user?.isBlocked || false,
       raw: user,
     }));
 
@@ -114,7 +120,7 @@ function UserManagement() {
     setCurrentPage(page);
   };
 
-  // 👇 open details modal
+  // open details modal
   const handleViewUser = (user) => {
     setSelectedUser(user);
     setIsModalOpen(true);
@@ -228,10 +234,16 @@ function UserManagement() {
                       <button
                         onClick={() => handleBlockUser(user)}
                         className="p-1 rounded text-[#101749] hover:bg-[#101749]/10"
-                        title="Block user"
-                        aria-label={`Block ${user.name}`}
+                        title={user.isBlocked ? "Unblock user" : "Block user"}
+                        aria-label={`${
+                          user.isBlocked ? "Unblock" : "Block"
+                        } ${user.name}`}
                       >
-                        <MdBlock size={18} />
+                        {user.isBlocked ? (
+                          <MdLockOpen size={18} />
+                        ) : (
+                          <MdBlock size={18} />
+                        )}
                       </button>
                       <button
                         onClick={() => handleViewUser(user)}
@@ -294,100 +306,11 @@ function UserManagement() {
         )}
       </div>
 
-      {/* ===== User Details Modal (Eye) ===== */}
-      {isModalOpen && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md p-4 overflow-hidden bg-white rounded-md shadow-xl">
-            <div className="relative">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="absolute p-1 rounded-full right-2 top-2 hover:bg-gray-100"
-                aria-label="Close"
-              >
-                <IoMdClose />
-              </button>
-
-              <div
-                className="p-6 text-center bg-[#101749] rounded-md"
-              >
-                <div className="w-24 h-24 mx-auto mb-4 overflow-hidden border-4 border-white rounded-full">
-                  <img
-                    src={selectedUser.avatar || userImage}
-                    onError={(e) => {
-                      e.currentTarget.src = userImage;
-                    }}
-                    alt={selectedUser.name}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-                <h2 className="text-xl font-bold text-white">
-                  {selectedUser.name}
-                </h2>
-                <p className="mt-1 text-sm text-white/90">
-                  Joined: {fmtDateTime(selectedUser.createdAt)}
-                </p>
-              </div>
-
-              <div className="p-6 text-sm">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="font-semibold text-black">Email</h3>
-                    <p className="text-gray-700 break-all">
-                      {selectedUser.email || "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-black">Phone</h3>
-                    <p className="text-gray-700">{selectedUser.phone || "—"}</p>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-black">Location</h3>
-                    <p className="text-gray-700">
-                      {selectedUser.location || "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-black">Updated</h3>
-                    <p className="text-gray-700">
-                      {fmtDateTime(selectedUser.updatedAt)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div className="p-3 rounded-md bg-gray-50">
-                    <div className="text-xs text-gray-500">Total Purchase</div>
-                    <div className="text-lg font-semibold">
-                      {selectedUser.totalPurchase}
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-md bg-gray-50">
-                    <div className="text-xs text-gray-500">Total Sales</div>
-                    <div className="text-lg font-semibold">
-                      {selectedUser.totalSales}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end mt-6">
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 text-white bg-[#101749] rounded-md"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ===== Block user modal ===== */}
+      {/* ===== Block/Unblock modal ===== */}
       {isModalBlock && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md overflow-hidden bg-white rounded-md shadow-xl">
-            <div className="relative">
+            <div className="relative p-6">
               <button
                 onClick={() => setIsModalBlock(false)}
                 className="absolute p-1 rounded-full right-2 top-2 hover:bg-gray-100"
@@ -395,49 +318,33 @@ function UserManagement() {
               >
                 <IoMdClose />
               </button>
-              <div className="flex flex-col items-center justify-center px-10 py-10 space-y-4">
-                <h2 className="text-xl font-bold text-[#101749] text-center">
-                  Are you sure you want to block this user?
-                </h2>
-                <div className="w-full p-4 text-sm rounded bg-gray-50">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Name</span>
-                    <span className="font-medium">{selectedUser.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Email</span>
-                    <span className="font-medium">{selectedUser.email}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Purchase</span>
-                    <span className="font-medium">
-                      {selectedUser.totalPurchase}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Sales</span>
-                    <span className="font-medium">
-                      {selectedUser.totalSales}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 pt-2">
-                  <button
-                    className="bg-[#101749] py-2 px-6 rounded-md font-semibold text-white"
-                    onClick={() => {
-                      // TODO: block API call with selectedUser.raw?._id
+              <h2 className="text-xl font-bold text-[#101749] text-center mb-6">
+                {selectedUser.isBlocked
+                  ? "Are you sure you want to unblock this user?"
+                  : "Are you sure you want to block this user?"}
+              </h2>
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  className="bg-[#101749] py-2 px-6 rounded-md font-semibold text-white"
+                  disabled={isBlocking}
+                  onClick={async () => {
+                    try {
+                      const userId = selectedUser?.raw?.user?._id;
+                      await toggleBlockUser(userId).unwrap();
                       setIsModalBlock(false);
-                    }}
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    className="px-6 py-2 font-semibold text-[#101749] border border-[#101749] rounded-md"
-                    onClick={() => setIsModalBlock(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
+                    } catch (err) {
+                      console.error("Failed to block/unblock user", err);
+                    }
+                  }}
+                >
+                  {isBlocking ? "Processing..." : "Confirm"}
+                </button>
+                <button
+                  className="px-6 py-2 font-semibold text-[#101749] border border-[#101749] rounded-md"
+                  onClick={() => setIsModalBlock(false)}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>

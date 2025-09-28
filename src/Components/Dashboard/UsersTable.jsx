@@ -116,7 +116,6 @@ function UsersTable() {
                         />
                         <div>
                           <p className="font-medium leading-tight">{user.name}</p>
-                          {/* <p className="text-xs text-gray-500">{fmtDate(user.createdAt)}</p> */}
                         </div>
                       </div>
                     </td>
