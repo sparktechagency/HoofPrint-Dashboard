@@ -1,19 +1,16 @@
 // src/pages/dashboard/UserOverviewChart.jsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Chart, registerables } from "chart.js";
-import { CalendarDays } from "lucide-react"; // optional; if not installed, remove the icon
+import DatePicker from "react-datepicker";
+import { CalendarDays } from "lucide-react";
+import "react-datepicker/dist/react-datepicker.css";
 import { useGetUserChartDataQuery } from "../../features/api/dashboardApi";
 
 Chart.register(...registerables);
 
-// Simple date helpers
+// helpers
 const toISO = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : d);
-const addDays = (d, days) => {
-  const x = new Date(d);
-  x.setDate(x.getDate() + days);
-  return x;
-};
-const formatPretty = (d) =>
+const pretty = (d) =>
   new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "long",
@@ -24,29 +21,24 @@ export default function UserOverviewChart() {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
-  // Default: last 90 days (adjust if you prefer)
-  const today = new Date();
-  const [startDate, setStartDate] = useState(toISO(addDays(today, -90)));
-  const [endDate, setEndDate] = useState(toISO(today));
+  // default range (adjust to taste)
+  const [startDate, setStartDate] = useState(new Date("2025-06-16"));
+  const [endDate, setEndDate] = useState(new Date("2025-09-10"));
+  const [open, setOpen] = useState(false);
 
-  // Fetch server data using startDate & endDate (same as product chart)
-  const { data, isLoading, isError, isFetching, error } = useGetUserChartDataQuery(
-    { startDate, endDate },
+  // ✅ call API with startDate & endDate (same style you use for products)
+  const { data, isLoading, isError, error, isFetching } = useGetUserChartDataQuery(
+    { startDate: toISO(startDate), endDate: toISO(endDate) },
     { refetchOnMountOrArgChange: true }
   );
 
-  // Normalize response shapes:
+  // normalize possible shapes
   const chartData = useMemo(() => {
-    const raw =
-      data?.data?.chartData ??
-      data?.chartData ??
-      data?.data ??
-      data ??
-      [];
+    const raw = data?.data?.chartData ?? data?.chartData ?? data?.data ?? data ?? [];
     return Array.isArray(raw) ? raw : [];
   }, [data]);
 
-  // Accept multiple keys from API for label/value
+  // support multiple keys from backend
   const labels = useMemo(
     () => chartData.map((d) => d.month ?? d.label ?? d.name ?? d.week ?? ""),
     [chartData]
@@ -59,7 +51,7 @@ export default function UserOverviewChart() {
   useEffect(() => {
     if (!chartRef.current || isLoading || isError) return;
 
-    // Destroy any existing chart first
+    // destroy previous
     if (chartInstance.current) {
       chartInstance.current.destroy();
       chartInstance.current = null;
@@ -71,11 +63,10 @@ export default function UserOverviewChart() {
 
     const height = canvas.clientHeight || 260;
 
-    // Dark-to-light vertical gradient (like your mock)
+    // gradient (light -> deep navy)
     const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    // top: light; bottom: deep blue
-    gradient.addColorStop(0, "rgba(138, 145, 170, 0.45)"); // soft light grey-blue
-    gradient.addColorStop(1, "rgba(11, 19, 73, 1)");       // deep navy #0B1349
+    gradient.addColorStop(0, "rgba(138, 145, 170, 0.45)");
+    gradient.addColorStop(1, "rgba(11, 19, 73, 1)"); // #0B1349
 
     chartInstance.current = new Chart(ctx, {
       type: "line",
@@ -90,7 +81,7 @@ export default function UserOverviewChart() {
             borderColor: "#0B1349",
             borderWidth: 2,
             tension: 0.45,
-            pointRadius: 0, // hidden points like in the mock
+            pointRadius: 0,
             pointHoverRadius: 3,
           },
         ],
@@ -113,20 +104,12 @@ export default function UserOverviewChart() {
         scales: {
           x: {
             grid: { display: false },
-            ticks: {
-              color: "#000000",
-              font: { size: 12 },
-            },
+            ticks: { color: "#000", font: { size: 12 }, padding: 6 },
           },
           y: {
             beginAtZero: true,
             grid: { color: "rgba(0,0,0,0.08)" },
-            ticks: {
-              color: "#000000",
-              font: { size: 12 },
-              // make the left scale match the mock look
-              padding: 6,
-            },
+            ticks: { color: "#000", font: { size: 12 }, padding: 6 },
           },
         },
       },
@@ -138,7 +121,6 @@ export default function UserOverviewChart() {
     };
   }, [labels, values, isLoading, isError, startDate, endDate]);
 
-  // UI states
   if (isLoading) return <p className="mt-6 text-center">Loading chart…</p>;
   if (isError)
     return (
@@ -149,59 +131,85 @@ export default function UserOverviewChart() {
 
   return (
     <div className="w-full">
-      {/* Header + Date range pill */}
-      <div className="flex items-center justify-between mb-2">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
         <h3 className="text-[15px] font-semibold text-black">Total User Overview</h3>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-1.5 text-sm border rounded-md">
-            {/* If you don't use lucide-react, remove this span */}
-            <span className="text-gray-500">
-              <CalendarDays size={16} />
-            </span>
-            <span className="text-gray-700 whitespace-nowrap">
-              {formatPretty(startDate)} to {formatPretty(endDate)}
-            </span>
-          </div>
+        {/* Date pill + popover (same UX as ProductOverview) */}
+        <div className="relative">
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm border rounded-md"
+          >
+            <span>{`${pretty(startDate)} to ${pretty(endDate)}`}</span>
+            <CalendarDays className="w-4 h-4 text-gray-600" />
+          </button>
 
-          {/* Hidden native inputs to keep the design clean but functional */}
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => {
-              const v = e.target.value;
-              setStartDate(v);
-              if (v && endDate && new Date(v) > new Date(endDate)) {
-                setEndDate(v);
-              }
-            }}
-            className="px-2 py-1 text-sm border rounded-md"
-          />
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => {
-              const v = e.target.value;
-              setEndDate(v);
-              if (v && startDate && new Date(v) < new Date(startDate)) {
-                setStartDate(v);
-              }
-            }}
-            className="px-2 py-1 text-sm border rounded-md"
-          />
+          {open && (
+            <>
+              {/* backdrop */}
+              <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+              {/* popover */}
+              <div className="absolute right-0 z-50 w-[600px] p-4 mt-2 bg-white border rounded-md shadow-xl">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700">From</label>
+                    <DatePicker
+                      selected={startDate}
+                      onChange={(d) => {
+                        setStartDate(d);
+                        if (d && endDate && d > endDate) setEndDate(d);
+                      }}
+                      maxDate={endDate || undefined}
+                      dateFormat="dd-MM-yyyy"
+                      className="w-full px-3 py-2 mt-1 border rounded"
+                      inline
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700">To</label>
+                    <DatePicker
+                      selected={endDate}
+                      onChange={(d) => {
+                        setEndDate(d);
+                        if (d && startDate && d < startDate) setStartDate(d);
+                      }}
+                      minDate={startDate || undefined}
+                      dateFormat="dd-MM-yyyy"
+                      className="w-full px-3 py-2 mt-1 border rounded"
+                      inline
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 mt-3">
+                  <button onClick={() => setOpen(false)} className="px-3 py-1.5 text-sm border rounded-md">
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="px-3 py-1.5 text-sm text-white bg-[#0B1349] rounded-md"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Chart */}
+      {/* Chart / empty state */}
       {chartData.length === 0 ? (
-        <div className="py-10 text-center text-gray-500 border rounded-md">
-          No data for this range.
-        </div>
+        <div className="py-10 text-center text-gray-500 border rounded-md">No data for this range.</div>
       ) : (
-        <div className="w-full h-[260px] rounded-md overflow-hidden">
+        <div className="w-full h-[260px] overflow-hidden rounded-md">
           <canvas ref={chartRef} />
         </div>
       )}
+
+      {/* tiny status */}
+      {isFetching && <div className="mt-1 text-xs text-right text-gray-500">Refreshing…</div>}
     </div>
   );
 }

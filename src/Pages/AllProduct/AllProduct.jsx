@@ -4,33 +4,32 @@ import { Eye } from "lucide-react";
 import { useGetAllProductsQuery } from "../../features/api/productApi";
 
 function AllProducts() {
+  // ---- hooks: keep these at the top, unconditionally ----
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState(""); // NEW
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 14;
 
   const { data, isLoading, isError, error } = useGetAllProductsQuery();
 
-  if (isLoading) return <p className="mt-16 text-center">Loading products...</p>;
-  if (isError) return <p className="mt-16 text-center text-red-600">Error loading products: {String(error?.message || error?.status || "Unknown error")}</p>;
+  // products are inside data.data.result; always compute via useMemo (still a hook!)
+  const products = useMemo(
+    () => (Array.isArray(data?.data?.result) ? data.data.result : []),
+    [data]
+  );
 
-  // products are inside data.data.result
-  const products = Array.isArray(data?.data?.result) ? data.data.result : [];
-
-  // Build unique, sorted category list for the dropdown
   const categoryOptions = useMemo(() => {
     const set = new Set(
       products
         .map((p) => p?.category?.name)
         .filter(Boolean)
-        .map((s) => String(s))
+        .map(String)
     );
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [products]);
 
-  // Filtering (by search + category)
   const filteredProducts = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     return products.filter((p) => {
@@ -38,66 +37,62 @@ function AllProducts() {
         !q ||
         p?.name?.toLowerCase().includes(q) ||
         p?.category?.name?.toLowerCase().includes(q);
-
       const matchesCategory =
         !categoryFilter || p?.category?.name === categoryFilter;
-
       return matchesSearch && matchesCategory;
     });
   }, [products, searchTerm, categoryFilter]);
 
-  // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
   const indexOfLastProduct = currentPage * pageSize;
   const indexOfFirstProduct = indexOfLastProduct - pageSize;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
+  // ---- after ALL hooks are declared, you can branch UI ----
+  if (isLoading) {
+    return <p className="mt-16 text-center">Loading products...</p>;
+  }
+  if (isError) {
+    return (
+      <p className="mt-16 text-center text-red-600">
+        Error loading products: {String(error?.message || error?.status || "Unknown error")}
+      </p>
+    );
+  }
+
+  // ---- handlers (plain functions, not hooks) ----
   const onPageChange = (page) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
-
   const handleViewProduct = (product) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
   };
 
-  // When filters change, reset to page 1
-  const onSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
-  };
-  const onCategoryChange = (e) => {
-    setCategoryFilter(e.target.value);
-    setCurrentPage(1);
-  };
-
   return (
     <>
       <div className="h-[calc(100vh-80px)] mt-16">
-        {/* Filters row */}
+        {/* Filters */}
         <div className="flex flex-col items-start justify-between gap-3 p-4 sm:flex-row">
           <div className="w-full sm:w-72">
             <input
               type="text"
               placeholder="Search by name or category…"
               value={searchTerm}
-              onChange={onSearchChange}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#101749]"
             />
           </div>
-
           <div className="w-full sm:w-72">
             <select
               value={categoryFilter}
-              onChange={onCategoryChange}
+              onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#101749]"
             >
               <option value="">All categories</option>
               {categoryOptions.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
+                <option key={name} value={name}>{name}</option>
               ))}
             </select>
           </div>
@@ -138,7 +133,6 @@ function AllProducts() {
                       {product?.price != null ? `$${product.price}` : "N/A"}
                     </td>
                     <td className="px-4 text-black">
-                      {/* backend field looks like 'stoke'; keep as-is */}
                       {product?.stoke ?? product?.stock ?? "N/A"}
                     </td>
                     <td className="px-4 text-black">{product?.color ?? "—"}</td>
@@ -176,17 +170,17 @@ function AllProducts() {
             >
               <IoIosArrowBack size={20} />
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
               <button
-                key={page}
-                onClick={() => onPageChange(page)}
+                key={pg}
+                onClick={() => onPageChange(pg)}
                 className={`px-3 py-1 mx-1 rounded-full ${
-                  currentPage === page
+                  currentPage === pg
                     ? "text-white bg-[#101749]"
                     : "bg-transparent text-black hover:bg-gray-100"
                 }`}
               >
-                {page}
+                {pg}
               </button>
             ))}
             <button
@@ -210,7 +204,6 @@ function AllProducts() {
                 <strong>Description:</strong> {selectedProduct.description || "—"}
               </p>
             </div>
-
             <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-2">
               <p><strong>Price:</strong> {selectedProduct.price != null ? `$${selectedProduct.price}` : "N/A"}</p>
               <p><strong>Stock:</strong> {selectedProduct.stoke ?? selectedProduct.stock ?? "N/A"}</p>
@@ -220,7 +213,6 @@ function AllProducts() {
               <p><strong>Delivery Options:</strong> {Array.isArray(selectedProduct.deliveryOption) ? selectedProduct.deliveryOption.join(", ") : "—"}</p>
               <p><strong>Shipping Charge:</strong> {selectedProduct.shippingCharge != null ? `$${selectedProduct.shippingCharge}` : "—"}</p>
             </div>
-
             <div className="mt-4">
               <h3 className="text-lg font-semibold">Images</h3>
               <div className="flex mt-2 space-x-3 overflow-x-auto">
@@ -235,7 +227,6 @@ function AllProducts() {
                 ))}
               </div>
             </div>
-
             <div className="flex justify-end">
               <button
                 onClick={() => setIsModalOpen(false)}

@@ -1,25 +1,11 @@
+// src/pages/users/UserManagement.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward, IoMdClose } from "react-icons/io";
 import { MdBlock, MdProductionQuantityLimits } from "react-icons/md";
-import { FaRegUser } from "react-icons/fa";
+import { Eye } from "lucide-react";
 import userImage from "../../assets/image/admin.jpg";
 import { useNavigate } from "react-router-dom";
 import { useGetAllUsersQuery } from "../../features/api/userApi";
-
-function formatCurrencyBDT(value) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
-    return "৳0";
-  }
-  try {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "BDT",
-      maximumFractionDigits: 0,
-    }).format(Number(value));
-  } catch (e) {
-    return `৳${Number(value).toLocaleString()}`;
-  }
-}
 
 function debounce(fn, delay = 300) {
   let timer;
@@ -29,13 +15,33 @@ function debounce(fn, delay = 300) {
   };
 }
 
+const fmtDateTime = (iso) => {
+  if (!iso) return "—";
+  try {
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+      .format(new Date(iso))
+      .replace(",", " /");
+  } catch {
+    return iso;
+  }
+};
+
 function UserManagement() {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isModalBlock, setIsModalBlock] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // 👈 details modal
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 14;
+
   const navigate = useNavigate();
   const searchInputRef = useRef(null);
 
@@ -43,11 +49,11 @@ function UserManagement() {
 
   const apiUsers = useMemo(() => data?.data?.result || [], [data]);
 
-  // Normalize API users into the shape the table needs
+  // normalize user for table
   const normalize = (users) =>
     users.map((user, index) => ({
       id: user?._id || `${index + 1}`,
-      serial: index + 1, // for stable display
+      serial: index + 1,
       name: user?.name || "Unknown",
       email: user?.email || "",
       phone: user?.phone || "",
@@ -60,12 +66,11 @@ function UserManagement() {
       raw: user,
     }));
 
-  // Initial / refresh load
   useEffect(() => {
     setFilteredUsers(normalize(apiUsers));
   }, [apiUsers]);
 
-  // Debounced search
+  // debounced search
   const runSearch = useMemo(
     () =>
       debounce((term) => {
@@ -109,15 +114,18 @@ function UserManagement() {
     setCurrentPage(page);
   };
 
-  // const handleViewUser = (user) => {
-  //   // Navigate to details page with full user payload in state
-  //   navigate(`/user-details/${user.id}`, { state: { user: user.raw || user } });
-  // };
+  // 👇 open details modal
+  const handleViewUser = (user) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
 
   const handleViewUserProduct = (user) => {
-  const userId = user?.raw?._id || user?._id || user?.id; // use your normalized object
-  navigate(`/users/${userId}/products`, { state: { user: user.raw || user } });
-};
+    const userId = user?.raw?._id || user?._id || user?.id;
+    navigate(`/users/${userId}/products`, {
+      state: { user: user.raw || user },
+    });
+  };
 
   const handleBlockUser = (user) => {
     setSelectedUser(user);
@@ -137,7 +145,9 @@ function UserManagement() {
       <div className="h-[calc(100vh-80px)] mt-16">
         {/* Header with search */}
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-lg font-semibold text-[#101749]">User Management</h1>
+          <h1 className="text-lg font-semibold text-[#101749]">
+            User Management
+          </h1>
           <div className="w-72">
             <input
               ref={searchInputRef}
@@ -168,7 +178,10 @@ function UserManagement() {
             <tbody>
               {(isLoading || isFetching) && (
                 <tr>
-                  <td className="px-4 py-6 text-center text-gray-500" colSpan={8}>
+                  <td
+                    className="px-4 py-6 text-center text-gray-500"
+                    colSpan={8}
+                  >
                     Loading users...
                   </td>
                 </tr>
@@ -176,7 +189,10 @@ function UserManagement() {
 
               {!isLoading && !isFetching && currentUsers.length === 0 && (
                 <tr>
-                  <td className="px-4 py-6 text-center text-gray-500" colSpan={8}>
+                  <td
+                    className="px-4 py-6 text-center text-gray-500"
+                    colSpan={8}
+                  >
                     No users found.
                   </td>
                 </tr>
@@ -189,20 +205,24 @@ function UserManagement() {
                   </td>
                   <td className="px-4 py-3 text-black">
                     <div className="flex items-center gap-2">
-                      {/* If you want the avatar, uncomment below */}
-                      {/* <img src={user.avatar} alt="User Avatar" className="object-cover w-8 h-8 rounded-full" /> */}
+                      <span className="inline-flex items-center justify-center rounded-full ring-1 ring-gray-200 p-[2px]">
+                        <img
+                          src={user.avatar}
+                          alt={user.name || "User"}
+                          className="object-cover bg-gray-100 rounded-full w-9 h-9"
+                          onError={(e) => {
+                            e.currentTarget.src = userImage;
+                          }}
+                        />
+                      </span>
                       <p className="font-medium">{user.name}</p>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-black">{user.location}</td>
                   <td className="px-4 py-3 text-black">{user.email}</td>
                   <td className="px-4 py-3 text-black">{user.phone}</td>
-                  <td className="px-4 py-3 text-black">
-                    {user.totalPurchase}
-                  </td>
-                  <td className="px-4 py-3 text-black">
-                    {user.totalSales}
-                  </td>
+                  <td className="px-4 py-3 text-black">{user.totalPurchase}</td>
+                  <td className="px-4 py-3 text-black">{user.totalSales}</td>
                   <td className="px-4 py-3 text-black">
                     <div className="flex items-center space-x-3">
                       <button
@@ -219,13 +239,13 @@ function UserManagement() {
                         title="View details"
                         aria-label={`View ${user.name}`}
                       >
-                        <FaRegUser size={18} />
+                        <Eye size={18} />
                       </button>
-                        <button
+                      <button
                         onClick={() => handleViewUserProduct(user)}
                         className="p-1 rounded text-[#101749] hover:bg-[#101749]/10"
-                        title="View details"
-                        aria-label={`View ${user.name}`}
+                        title="View products"
+                        aria-label={`View products for ${user.name}`}
                       >
                         <MdProductionQuantityLimits size={18} />
                       </button>
@@ -274,7 +294,96 @@ function UserManagement() {
         )}
       </div>
 
-      {/* Modal for block user */}
+      {/* ===== User Details Modal (Eye) ===== */}
+      {isModalOpen && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md p-4 overflow-hidden bg-white rounded-md shadow-xl">
+            <div className="relative">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="absolute p-1 rounded-full right-2 top-2 hover:bg-gray-100"
+                aria-label="Close"
+              >
+                <IoMdClose />
+              </button>
+
+              <div
+                className="p-6 text-center bg-[#101749] rounded-md"
+              >
+                <div className="w-24 h-24 mx-auto mb-4 overflow-hidden border-4 border-white rounded-full">
+                  <img
+                    src={selectedUser.avatar || userImage}
+                    onError={(e) => {
+                      e.currentTarget.src = userImage;
+                    }}
+                    alt={selectedUser.name}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+                <h2 className="text-xl font-bold text-white">
+                  {selectedUser.name}
+                </h2>
+                <p className="mt-1 text-sm text-white/90">
+                  Joined: {fmtDateTime(selectedUser.createdAt)}
+                </p>
+              </div>
+
+              <div className="p-6 text-sm">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-semibold text-black">Email</h3>
+                    <p className="text-gray-700 break-all">
+                      {selectedUser.email || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-black">Phone</h3>
+                    <p className="text-gray-700">{selectedUser.phone || "—"}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-black">Location</h3>
+                    <p className="text-gray-700">
+                      {selectedUser.location || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-black">Updated</h3>
+                    <p className="text-gray-700">
+                      {fmtDateTime(selectedUser.updatedAt)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="p-3 rounded-md bg-gray-50">
+                    <div className="text-xs text-gray-500">Total Purchase</div>
+                    <div className="text-lg font-semibold">
+                      {selectedUser.totalPurchase}
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-md bg-gray-50">
+                    <div className="text-xs text-gray-500">Total Sales</div>
+                    <div className="text-lg font-semibold">
+                      {selectedUser.totalSales}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 text-white bg-[#101749] rounded-md"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== Block user modal ===== */}
       {isModalBlock && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md overflow-hidden bg-white rounded-md shadow-xl">
@@ -301,18 +410,22 @@ function UserManagement() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Purchase</span>
-                    <span className="font-medium">{formatCurrencyBDT(selectedUser.totalPurchase)}</span>
+                    <span className="font-medium">
+                      {selectedUser.totalPurchase}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Sales</span>
-                    <span className="font-medium">{formatCurrencyBDT(selectedUser.totalSales)}</span>
+                    <span className="font-medium">
+                      {selectedUser.totalSales}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 pt-2">
                   <button
                     className="bg-[#101749] py-2 px-6 rounded-md font-semibold text-white"
                     onClick={() => {
-
+                      // TODO: block API call with selectedUser.raw?._id
                       setIsModalBlock(false);
                     }}
                   >

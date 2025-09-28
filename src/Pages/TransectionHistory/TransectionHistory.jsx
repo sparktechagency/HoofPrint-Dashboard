@@ -1,562 +1,260 @@
-import { useState } from "react";
-import { IoIosArrowBack, IoIosArrowForward, IoMdClose } from "react-icons/io";
-import { MdBlock } from "react-icons/md";
-import userImage from "../../assets/image/admin.jpg";
+// src/pages/transactions/TransectionHistory.jsx
+import { useMemo, useState } from "react";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { CalendarDays } from "lucide-react";
+import userImage from "../../assets/image/admin.jpg";
+import { useGetAllTransactionsQuery } from "../../features/api/transactionApi";
 
-function TransectionHistory() {
- const initialUsers = [
-  {
-    id: "#01",
-    name: "Alice Johnson",
-    date: "12.05.2025/10.25 AM",
-    email: "alice.johnson@example.com",
-    phone: "123-456-7890",
-    transectionNo: "#256662FKEE",
-    amount: "$30",
-    avatar: "https://randomuser.me/api/portraits/women/59.jpg",
-    location: "New York",
-  },
-  {
-    id: "#02",
-    name: "Michael Smith",
-    email: "michael.smith@example.com",
-    phone: "987-654-3210",
-    transectionNo: "#745625XLM",
-    amount: "$50",
-    avatar: "https://randomuser.me/api/portraits/men/82.jpg",
-    location: "Los Angeles",
-    date: "12.05.2025/11.00 AM",
-  },
-  {
-    id: "#03",
-    name: "Emma Williams",
-    email: "emma.williams@example.com",
-    phone: "555-123-4567",
-    transectionNo: "#6438LMK93",
-    amount: "$120",
-    avatar: "https://randomuser.me/api/portraits/women/94.jpg",
-    location: "Chicago",
-    date: "12.05.2025/11.30 AM",
-  },
-  {
-    id: "#04",
-    name: "Daniel Brown",
-    email: "daniel.brown@example.com",
-    phone: "444-987-6543",
-    transectionNo: "#295A7XFG4",
-    amount: "$75",
-    avatar: "https://randomuser.me/api/portraits/men/64.jpg",
-    location: "Houston",
-    date: "12.05.2025/12.00 PM",
-  },
-  {
-    id: "#05",
-    name: "Olivia Davis",
-    email: "olivia.davis@example.com",
-    phone: "333-555-7777",
-    transectionNo: "#585XQ989T",
-    amount: "$90",
-    avatar: "https://randomuser.me/api/portraits/women/47.jpg",
-    location: "Phoenix",
-    date: "12.05.2025/12.30 PM",
-  },
-  {
-    id: "#06",
-    name: "Liam Miller",
-    email: "liam.miller@example.com",
-    phone: "222-444-8888",
-    transectionNo: "#8475KLMQ9",
-    amount: "$40",
-    avatar: "https://randomuser.me/api/portraits/men/65.jpg",
-    location: "San Diego",
-    date: "12.05.2025/01.00 PM",
-  },
-  {
-    id: "#07",
-    name: "Sophia Wilson",
-    email: "sophia.wilson@example.com",
-    phone: "111-999-5555",
-    transectionNo: "#963YF562T",
-    amount: "$60",
-    avatar: "https://randomuser.me/api/portraits/men/97.jpg",
-    location: "Dallas",
-    date: "12.05.2025/01.30 PM",
-  },
-  {
-    id: "#08",
-    name: "Noah Moore",
-    email: "noah.moore@example.com",
-    phone: "666-777-8888",
-    transectionNo: "#9576TNG73",
-    amount: "$110",
-    avatar: "https://randomuser.me/api/portraits/women/25.jpg",
-    location: "Austin",
-    date: "12.05.2025/02.00 PM",
-  },
-  {
-    id: "#09",
-    name: "Isabella Taylor",
-    email: "isabella.taylor@example.com",
-    phone: "777-888-9999",
-    transectionNo: "#264TRF672",
-    amount: "$80",
-    avatar: "https://randomuser.me/api/portraits/men/19.jpg",
-    location: "Miami",
-    date: "12.05.2025/02.30 PM",
-  },
-  {
-    id: "#10",
-    name: "James Anderson",
-    email: "james.anderson@example.com",
-    phone: "555-555-5555",
-    transectionNo: "#3956TK33M",
-    amount: "$100",
-    avatar: "https://randomuser.me/api/portraits/women/76.jpg",
-    location: "Atlanta",
-    date: "12.05.2025/03.00 PM",
-  },
-  {
-    id: "#11",
-    name: "Mia Thomas",
-    email: "mia.thomas@example.com",
-    phone: "888-777-6666",
-    transectionNo: "#715X92KYM",
-    amount: "$70",
-    avatar: "https://randomuser.me/api/portraits/women/47.jpg",
-    location: "Boston",
-    date: "12.05.2025/03.30 PM",
-  },
-  {
-    id: "#12",
-    name: "Benjamin Jackson",
-    email: "benjamin.jackson@example.com",
-    phone: "444-333-2222",
-    transectionNo: "#26462XGF3",
-    amount: "$55",
-    avatar: "https://randomuser.me/api/portraits/men/64.jpg",
-    location: "Philadelphia",
-    date: "12.05.2025/04.00 PM",
-  },
-  {
-    id: "#13",
-    name: "Charlotte White",
-    email: "charlotte.white@example.com",
-    phone: "123-789-4560",
-    transectionNo: "#576TYNN6F",
-    amount: "$65",
-    avatar: "https://randomuser.me/api/portraits/women/94.jpg",
-    location: "San Francisco",
-    date: "12.05.2025/04.30 PM",
-  },
-  {
-    id: "#14",
-    name: "Lucas Harris",
-    email: "lucas.harris@example.com",
-    phone: "777-333-1111",
-    transectionNo: "#82934TJGF",
-    amount: "$85",
-    avatar: "https://randomuser.me/api/portraits/men/82.jpg",
-    location: "Las Vegas",
-    date: "12.05.2025/05.00 PM",
-  },
-  {
-    id: "#15",
-    name: "Amelia Martin",
-    email: "amelia.martin@example.com",
-    phone: "555-222-3333",
-    transectionNo: "#394T9F8HF",
-    amount: "$95",
-    avatar: "https://randomuser.me/api/portraits/women/59.jpg",
-    location: "Denver",
-    date: "12.05.2025/05.30 PM",
-  },
-  {
-    id: "#16",
-    name: "Elijah Thompson",
-    email: "elijah.thompson@example.com",
-    phone: "444-666-8888",
-    transectionNo: "#738XNGG5F",
-    amount: "$120",
-    avatar: "https://randomuser.me/api/portraits/men/65.jpg",
-    location: "Seattle",
-    date: "12.05.2025/06.00 PM",
-  },
-  {
-    id: "#17",
-    name: "Harper Garcia",
-    email: "harper.garcia@example.com",
-    phone: "333-222-1111",
-    transectionNo: "#24634KF3",
-    amount: "$135",
-    avatar: "https://randomuser.me/api/portraits/men/97.jpg",
-    location: "Portland",
-    date: "12.05.2025/06.30 PM",
-  },
-  {
-    id: "#18",
-    name: "William Martinez",
-    email: "william.martinez@example.com",
-    phone: "123-555-9999",
-    transectionNo: "#347B58L6",
-    amount: "$140",
-    avatar: "https://randomuser.me/api/portraits/women/76.jpg",
-    location: "Miami",
-    date: "12.05.2025/07.00 PM",
-  },
-  {
-    id: "#19",
-    name: "Evelyn Robinson",
-    email: "evelyn.robinson@example.com",
-    phone: "888-666-4444",
-    transectionNo: "#748X93AB",
-    amount: "$150",
-    avatar: "https://randomuser.me/api/portraits/women/47.jpg",
-    location: "New York",
-    date: "12.05.2025/07.30 PM",
-  },
-  {
-    id: "#20",
-    name: "Henry Clark",
-    email: "henry.clark@example.com",
-    phone: "777-555-4444",
-    transectionNo: "#7435TGD3",
-    amount: "$65",
-    avatar: "https://randomuser.me/api/portraits/men/82.jpg",
-    location: "Chicago",
-    date: "12.05.2025/08.00 PM",
-  },
-  {
-    id: "#21",
-    name: "Abigail Rodriguez",
-    email: "abigail.rodriguez@example.com",
-    phone: "111-888-6666",
-    transectionNo: "#2643G5YK",
-    amount: "$75",
-    avatar: "https://randomuser.me/api/portraits/women/59.jpg",
-    location: "Houston",
-    date: "12.05.2025/08.30 PM",
-  },
-  {
-    id: "#22",
-    name: "Sebastian Lewis",
-    email: "sebastian.lewis@example.com",
-    phone: "333-444-5555",
-    transectionNo: "#389K64LM",
-    amount: "$60",
-    avatar: "https://randomuser.me/api/portraits/men/64.jpg",
-    location: "Austin",
-    date: "12.05.2025/09.00 PM",
-  },
-  {
-    id: "#23",
-    name: "Ella Lee",
-    email: "ella.lee@example.com",
-    phone: "666-555-4444",
-    transectionNo: "#478X34MN",
-    amount: "$120",
-    avatar: "https://randomuser.me/api/portraits/men/19.jpg",
-    location: "Dallas",
-    date: "12.05.2025/09.30 PM",
-  },
-  {
-    id: "#24",
-    name: "Alexander Walker",
-    email: "alexander.walker@example.com",
-    phone: "555-444-3333",
-    transectionNo: "#983Y672J",
-    amount: "$50",
-    avatar: "https://randomuser.me/api/portraits/women/76.jpg",
-    location: "Atlanta",
-    date: "12.05.2025/10.00 PM",
-  },
-  {
-    id: "#25",
-    name: "Avery Hall",
-    email: "avery.hall@example.com",
-    phone: "222-999-8888",
-    transectionNo: "#746TY28M",
-    amount: "$60",
-    avatar: "https://randomuser.me/api/portraits/men/19.jpg",
-    location: "Philadelphia",
-    date: "12.05.2025/10.30 PM",
-  },
-  {
-    id: "#26",
-    name: "Jack Allen",
-    email: "jack.allen@example.com",
-    phone: "111-444-7777",
-    transectionNo: "#263BYN82",
-    amount: "$80",
-    avatar: "https://randomuser.me/api/portraits/women/59.jpg",
-    location: "San Diego",
-    date: "12.05.2025/11.00 PM",
-  },
-  {
-    id: "#27",
-    name: "Scarlett Young",
-    email: "scarlett.young@example.com",
-    phone: "777-222-3333",
-    transectionNo: "#852W6MN4",
-    amount: "$110",
-    avatar: "https://randomuser.me/api/portraits/men/64.jpg",
-    location: "Seattle",
-    date: "12.05.2025/11.30 PM",
-  },
-  {
-    id: "#28",
-    name: "Levi Hernandez",
-    email: "levi.hernandez@example.com",
-    phone: "888-111-4444",
-    transectionNo: "#739BG4NR",
-    amount: "$90",
-    avatar: "https://randomuser.me/api/portraits/men/19.jpg",
-    location: "Portland",
-    date: "12.06.2025/12.00 AM",
-  },
-  {
-    id: "#29",
-    name: "Grace King",
-    email: "grace.king@example.com",
-    phone: "555-666-7777",
-    transectionNo: "#284X5RYA",
-    amount: "$75",
-    avatar: "https://randomuser.me/api/portraits/women/76.jpg",
-    location: "San Francisco",
-    date: "12.06.2025/12.30 AM",
-  },
-  {
-    id: "#30",
-    name: "Matthew Wright",
-    email: "matthew.wright@example.com",
-    phone: "444-111-9999",
-    transectionNo: "#6453J9F6",
-    amount: "$130",
-    avatar: "https://randomuser.me/api/portraits/men/82.jpg",
-    location: "Las Vegas",
-    date: "12.06.2025/01.00 AM",
-  },
-];
+const toISO = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : d);
+const pretty = (d) =>
+  new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "long", year: "numeric" })
+    .format(new Date(d));
+const fmtDateTime = (iso) =>
+  new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: true,
+  }).format(new Date(iso)).replace(",", " /");
 
-
- const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isModalBlock, setIsModalBlock] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+export default function TransectionHistory() {
+  // search & date UI state
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState(initialUsers);
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 14;
-
-  const [startDate, setStartDate] = useState(new Date("2025-06-16"));
-  const [endDate, setEndDate] = useState(new Date("2025-09-10"));
+  const [startDate, setStartDate] = useState(new Date("2025-09-01"));
+  const [endDate, setEndDate] = useState(new Date("2025-10-10"));
   const [showCalendar, setShowCalendar] = useState(false);
 
-  const handleSearch = (e) => {
-    const term = e.target.value;
-    setSearchTerm(term);
-    if (term.trim() === "") {
-      setFilteredUsers(initialUsers);
-    } else {
-      const filtered = initialUsers.filter(
-        (user) =>
-          user.name.toLowerCase().includes(term.toLowerCase()) ||
-          user.email.toLowerCase().includes(term.toLowerCase()) ||
-          user.location.toLowerCase().includes(term.toLowerCase())
-      );
-      setFilteredUsers(filtered);
+  // whether to actually send date filters to the API
+  const [useDateFilter, setUseDateFilter] = useState(false);
+
+  // pagination
+  const [page, setPage] = useState(1);
+  const limit = 14;
+
+  // Build args: only include dates if user applied filter
+  const queryArgs = useMemo(() => {
+    const base = { page, limit };
+    if (searchTerm.trim()) base.searchTerm = searchTerm.trim();
+    if (useDateFilter) {
+      base.startDate = toISO(startDate);
+      base.endDate = toISO(endDate);
     }
-    setCurrentPage(1);
-  };
+    return base;
+  }, [page, limit, searchTerm, useDateFilter, startDate, endDate]);
 
-  const indexOfLastUser = currentPage * pageSize;
-  const indexOfFirstUser = indexOfLastUser - pageSize;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const { data, isLoading, isError, error, isFetching } = useGetAllTransactionsQuery(
+    queryArgs,
+    { refetchOnMountOrArgChange: true }
+  );
 
-  const onPageChange = (page) => {
-    setCurrentPage(page);
-  };
+  const list = data?.data?.result ?? [];
+  const meta = data?.data?.meta ?? { page, limit, total: list.length, totalPage: 1 };
 
-  const handleViewUser = (user) => {
-    setSelectedUser(user);
-    setIsModalOpen(true);
-  };
+  // Client-side search fallback (if backend ignores searchTerm)
+  const visible = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((t) => {
+      const name = t?.user?.name?.toLowerCase() || "";
+      const tx = t?.transactionId?.toLowerCase() || "";
+      const type = t?.type?.toLowerCase() || "";
+      return name.includes(q) || tx.includes(q) || type.includes(q);
+    });
+  }, [list, searchTerm]);
 
-  const handleBlockUser = (user) => {
-    setSelectedUser(user);
-    setIsModalBlock(true);
-  };
+  const totalPages = meta?.totalPage || Math.max(1, Math.ceil((meta?.total || visible.length) / limit));
+  const onPageChange = (p) => { if (p >= 1 && p <= totalPages) setPage(p); };
 
-  const totalPages = Math.ceil(filteredUsers.length / pageSize);
-
-  const presets = [
-    "Last 24 hours",
-    "Last 7 days",
-    "Last 30 days",
-    "Custom Range",
-  ];
+  // DEBUG (you can remove these)
+  // console.log("args sent:", queryArgs);
+  // console.log("api response:", data);
 
   return (
-      <>
+    <>
       <div className="h-[calc(100vh-80px)] mt-16">
-        <div className="flex justify-between p-4">
-          <div className="w-72">
+        {/* Filters */}
+        <div className="flex flex-col items-start justify-between gap-3 p-4 sm:flex-row">
+          <div className="w-full sm:w-72">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search by name / txn id / type…"
               value={searchTerm}
-              onChange={handleSearch}
-              className="w-full px-4 py-2 rounded-md"
+              onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#101749]"
             />
           </div>
-          <div>
+
+          <div className="relative">
             <button
-              onClick={() => setShowCalendar(!showCalendar)}
-              className="flex items-center px-4 py-2 text-sm text-black border border-black rounded-md"
+              onClick={() => setShowCalendar((v) => !v)}
+              className="flex items-center gap-2 px-4 py-2 text-sm border rounded-md"
             >
-              <CalendarDays className="w-5 h-5 mr-2" />
-              {startDate?.toLocaleDateString()} to {endDate?.toLocaleDateString()}
+              <CalendarDays className="w-4 h-4" />
+              {useDateFilter
+                ? `${pretty(startDate)} to ${pretty(endDate)}`
+                : "All time"}
             </button>
+
+            {showCalendar && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowCalendar(false)} />
+                <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border rounded-md shadow-xl flex p-6 min-w-[700px]">
+                  <div className="grid grid-cols-2 gap-4 p-4">
+                    <div>
+                      <label className="text-sm font-semibold text-black">From</label>
+                      <DatePicker
+                        selected={startDate}
+                        onChange={(d) => { setStartDate(d); if (d && endDate && d > endDate) setEndDate(d); }}
+                        maxDate={endDate || undefined}
+                        dateFormat="dd-MM-yyyy"
+                        className="w-full px-3 py-2 mt-1 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold text-black">To</label>
+                      <DatePicker
+                        selected={endDate}
+                        onChange={(d) => { setEndDate(d); if (d && startDate && d < startDate) setStartDate(d); }}
+                        minDate={startDate || undefined}
+                        dateFormat="dd-MM-yyyy"
+                        className="w-full px-3 py-2 mt-1 border rounded"
+                      />
+                    </div>
+                    <div className="flex col-span-2 gap-6 mt-4">
+                      <DatePicker selected={startDate} onChange={setStartDate} inline />
+                      <DatePicker selected={endDate} onChange={setEndDate} inline />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col pl-4 border-l">
+                    {["All time", "Last 24 hours", "Last 7 days", "Last 30 days"].map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => {
+                          const now = new Date();
+                          if (p === "All time") {
+                            setUseDateFilter(false);
+                          } else if (p === "Last 24 hours") {
+                            setEndDate(now);
+                            setStartDate(new Date(now.getTime() - 24 * 60 * 60 * 1000));
+                            setUseDateFilter(true);
+                          } else if (p === "Last 7 days") {
+                            setEndDate(now);
+                            setStartDate(new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000));
+                            setUseDateFilter(true);
+                          } else if (p === "Last 30 days") {
+                            setEndDate(now);
+                            setStartDate(new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000));
+                            setUseDateFilter(true);
+                          }
+                        }}
+                        className="px-4 py-2 text-sm text-left rounded-md hover:bg-gray-100"
+                      >
+                        {p}
+                      </button>
+                    ))}
+                    <div className="flex gap-2 mt-auto">
+                      <button
+                        className="px-4 py-2 text-sm border rounded-md"
+                        onClick={() => setShowCalendar(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="px-4 py-2 text-sm text-white bg-[#101749] rounded-md"
+                        onClick={() => { setUseDateFilter(true); setShowCalendar(false); setPage(1); }}
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
+        {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#101749] ">
+            <thead className="bg-[#101749]">
               <tr className="text-white">
                 <th className="px-4 py-3 text-left">Serial</th>
                 <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3 text-left">Date & Time</th>
-                <th className="px-4 py-3 text-left">Email</th>
-                <th className="px-4 py-3 text-left">Phone Number</th>
-                <th className="px-4 py-3 text-left">Transection No</th>
+                <th className="px-4 py-3 text-left">Transaction ID</th>
+                <th className="px-4 py-3 text-left">Type</th>
                 <th className="px-4 py-3 text-left">Amount</th>
               </tr>
             </thead>
-            <tbody>
-              {currentUsers.map((user, index) => (
-                <tr key={index}>
-                  <td className="px-4 text-black">{user.id}</td>
-                  <td className="px-4 text-black">
-                    <div className="flex gap-x-5">
-                      <img
-                        src={user.avatar}
-                        alt="User Avatar"
-                        className="object-cover w-10 h-10 rounded-full"
-                      />
-                      <p>{user.name}</p>
-                    </div>
+            <tbody className="">
+              {visible.length > 0 ? (
+                visible.map((tx, idx) => (
+                  <tr key={tx._id} className="border-b ">
+                    <td className="px-4 text-black">
+                      {(meta.page - 1) * meta.limit + idx + 1}
+                    </td>
+                    <td className="px-4 text-black">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={tx.user?.profile_image || userImage}
+                          alt={tx.user?.name || "User"}
+                          className="object-cover w-10 h-10 bg-gray-100 rounded-full"
+                          onError={(e) => { e.currentTarget.src = userImage; }}
+                        />
+                        <span>{tx.user?.name || "—"}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 text-black">{fmtDateTime(tx.createdAt)}</td>
+                    <td className="px-4 text-black">{tx.transactionId}</td>
+                    <td className="px-4 text-black">{tx.type || "—"}</td>
+                    <td className="px-4 text-black">${tx.amount}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="p-6 text-center text-gray-500">
+                    No transactions found.
                   </td>
-                  <td className="px-4 text-black">{user.date}</td>
-                  <td className="px-4 text-black">{user.email}</td>
-                  <td className="px-4 text-black">{user.phone}</td>
-                  <td className="px-4 text-black">{user.transectionNo}</td>
-                  <td className="px-4 text-black">{user.amount}</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
 
-        <div className="flex justify-center py-4">
-          <button
-            onClick={() => onPageChange(currentPage - 1)}
-            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50"
-            disabled={currentPage === 1}
-          >
-            <IoIosArrowBack size={20} />
-          </button>
-          {[...Array(totalPages)].map((_, index) => (
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center py-4">
             <button
-              key={index}
-              onClick={() => onPageChange(index + 1)}
-              className={`px-3 py-1 mx-1 rounded-full ${
-                currentPage === index + 1
-                  ? "text-white bg-[#101749]"
-                  : "bg-transparent text-black"
-              }`}
+              onClick={() => onPageChange(meta.page - 1)}
+              className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50 hover:bg-gray-100"
+              disabled={meta.page <= 1}
             >
-              {index + 1}
+              <IoIosArrowBack size={20} />
             </button>
-          ))}
-          <button
-            onClick={() => onPageChange(currentPage + 1)}
-            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50"
-            disabled={currentPage === totalPages}
-          >
-            <IoIosArrowForward size={20} />
-          </button>
-        </div>
-      </div>
-
-      {/* Calendar Popup */}
-      {showCalendar && (
-        <>
-          {/* Overlay */}
-          <div
-            className="fixed inset-0 z-40 bg-black bg-opacity-30"
-            onClick={() => setShowCalendar(false)}
-          />
-          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border rounded-md shadow-xl flex p-6 min-w-[700px]">
-            {/* Date Inputs & Calendar */}
-            <div className="grid grid-cols-2 gap-4 p-4">
-              <div>
-                <label className="text-sm font-semibold text-black">From</label>
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  dateFormat="dd-MM-yyyy"
-                  className="w-full px-3 py-2 mt-1 border"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-black">To</label>
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  dateFormat="dd-MM-yyyy"
-                  className="w-full px-3 py-2 mt-1 border"
-                />
-              </div>
-              <div className="flex col-span-2 gap-6 mt-4">
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  inline
-                />
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  inline
-                />
-              </div>
-            </div>
-
-            {/* Presets */}
-            <div className="flex flex-col pl-4 border-l">
-              {presets.map((item, idx) => (
-                <button
-                  key={idx}
-                  className={`text-left px-4 py-2 hover:bg-gray-100 rounded-md text-sm ${
-                    item === "Custom Range" ? "bg-orange-100 font-semibold" : ""
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
               <button
-                className="px-4 py-2 mt-auto text-white bg-blue-900 rounded-md"
-                onClick={() => setShowCalendar(false)}
+                key={p}
+                onClick={() => onPageChange(p)}
+                className={`px-3 py-1 mx-1 rounded-full ${
+                  meta.page === p ? "text-white bg-[#101749]" : "bg-transparent text-black hover:bg-gray-100"
+                }`}
               >
-                Apply
+                {p}
               </button>
-            </div>
+            ))}
+            <button
+              onClick={() => onPageChange(meta.page + 1)}
+              className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50 hover:bg-gray-100"
+              disabled={meta.page >= totalPages}
+            >
+              <IoIosArrowForward size={20} />
+            </button>
           </div>
-        </>
-      )}
+        )}
+
+        {isFetching && <div className="mt-1 text-xs text-right text-gray-500">Refreshing…</div>}
+      </div>
     </>
   );
 }
-
-export default TransectionHistory;
