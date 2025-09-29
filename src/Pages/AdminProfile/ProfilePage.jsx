@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 import Profile from "./Profile";
 import { LuPenLine } from "react-icons/lu";
-import admin from "../../assets/image/admin.jpg";
+import admin from "../../assets/image/superadmin.png";
 
 function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile");

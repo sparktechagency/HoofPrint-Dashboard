@@ -191,10 +191,10 @@ export default function TransectionHistory() {
               {visible.length > 0 ? (
                 visible.map((tx, idx) => (
                   <tr key={tx._id} className="border-b ">
-                    <td className="px-4 text-black">
+                    <td className="px-4 py-3 text-black">
                       {(meta.page - 1) * meta.limit + idx + 1}
                     </td>
-                    <td className="px-4 text-black">
+                    <td className="px-4 py-3 text-black">
                       <div className="flex items-center gap-3">
                         <img
                           src={tx.user?.profile_image || userImage}
@@ -205,10 +205,10 @@ export default function TransectionHistory() {
                         <span>{tx.user?.name || "—"}</span>
                       </div>
                     </td>
-                    <td className="px-4 text-black">{fmtDateTime(tx.createdAt)}</td>
-                    <td className="px-4 text-black">{tx.transactionId}</td>
-                    <td className="px-4 text-black">{tx.type || "—"}</td>
-                    <td className="px-4 text-black">${tx.amount}</td>
+                    <td className="px-4 py-3 text-black">{fmtDateTime(tx.createdAt)}</td>
+                    <td className="px-4 py-3 text-black">{tx.transactionId}</td>
+                    <td className="px-4 py-3 text-black">{tx.type || "—"}</td>
+                    <td className="px-4 py-3 text-black">${tx.amount}</td>
                   </tr>
                 ))
               ) : (

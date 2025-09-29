@@ -1,3 +1,4 @@
+// src/pages/products/AllProducts.jsx
 import React, { useMemo, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { Eye } from "lucide-react";
@@ -103,24 +104,24 @@ function AllProducts() {
           <table className="w-full">
             <thead className="bg-[#101749]">
               <tr className="text-white">
-                <th className="px-4 py-3 text-left">Serial</th>
-                <th className="px-4 py-3 text-left">Image</th>
-                <th className="px-4 py-3 text-left">Name</th>
-                <th className="px-4 py-3 text-left">Price</th>
-                <th className="px-4 py-3 text-left">Stock</th>
-                <th className="px-4 py-3 text-left">Color</th>
-                <th className="px-4 py-3 text-left">Category</th>
-                <th className="px-4 py-3 text-left">Actions</th>
+                <th className="px-4 py-2 text-left">Color</th>
+                <th className="px-4 py-2 text-left">Serial</th>
+                <th className="px-4 py-2 text-left">Actions</th>
+                <th className="px-4 py-2 text-left">Image</th>
+                <th className="px-4 py-2 text-left">Name</th>
+                <th className="px-4 py-2 text-left">Price</th>
+                <th className="px-4 py-2 text-left">Stock</th>
+                <th className="px-4 py-2 text-left">Category</th>
               </tr>
             </thead>
             <tbody>
               {currentProducts.length > 0 ? (
                 currentProducts.map((product, index) => (
-                  <tr key={product._id} className="border-b">
-                    <td className="px-4 text-black">
+                  <tr key={product._id} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-1 text-black">
                       {(currentPage - 1) * pageSize + index + 1}
                     </td>
-                    <td className="px-4 text-black">
+                    <td className="px-4 py-1 text-black">
                       <img
                         src={product?.images?.[0] || ""}
                         alt="Product"
@@ -128,18 +129,18 @@ function AllProducts() {
                         onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
                       />
                     </td>
-                    <td className="px-4 text-black">{product?.name}</td>
-                    <td className="px-4 text-black">
+                    <td className="px-4 py-1 text-black">{product?.name}</td>
+                    <td className="px-4 py-1 text-black">
                       {product?.price != null ? `$${product.price}` : "N/A"}
                     </td>
-                    <td className="px-4 text-black">
+                    <td className="px-4 py-1 text-black">
                       {product?.stoke ?? product?.stock ?? "N/A"}
                     </td>
-                    <td className="px-4 text-black">{product?.color ?? "—"}</td>
-                    <td className="px-4 text-black">{product?.category?.name ?? "—"}</td>
-                    <td className="px-4 text-black">
+                    <td className="px-4 py-1 text-black">{product?.color ?? "—"}</td>
+                    <td className="px-4 py-1 text-black">{product?.category?.name ?? "—"}</td>
+                    <td className="px-4 py-1 text-black">
                       <button
-                        className="p-1 ml-2 rounded hover:bg-gray-100"
+                        className="p-1 ml-2 rounded text-[#101749] hover:bg-[#101749]/10"
                         onClick={() => handleViewProduct(product)}
                         title="View"
                         aria-label="View"
@@ -160,33 +161,36 @@ function AllProducts() {
           </table>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center py-4">
+        {/* Pagination (button style like UserManagement) */}
+        {filteredProducts.length > 0 && (
+          <div className="flex items-center justify-center gap-1 py-4">
             <button
               onClick={() => onPageChange(currentPage - 1)}
-              className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50 hover:bg-gray-100"
+              className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-40 hover:bg-gray-100"
               disabled={currentPage === 1}
+              aria-label="Previous page"
             >
               <IoIosArrowBack size={20} />
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
-                key={pg}
-                onClick={() => onPageChange(pg)}
-                className={`px-3 py-1 mx-1 rounded-full ${
-                  currentPage === pg
-                    ? "text-white bg-[#101749]"
-                    : "bg-transparent text-black hover:bg-gray-100"
+                key={page}
+                onClick={() => onPageChange(page)}
+                className={`px-3 py-1 mx-1 rounded-full border ${
+                  currentPage === page
+                    ? "text-white bg-[#101749] border-[#101749]"
+                    : "bg-transparent text-black border-transparent hover:bg-gray-100"
                 }`}
+                aria-current={currentPage === page ? "page" : undefined}
               >
-                {pg}
+                {page}
               </button>
             ))}
             <button
               onClick={() => onPageChange(currentPage + 1)}
-              className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-50 hover:bg-gray-100"
+              className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-40 hover:bg-gray-100"
               disabled={currentPage === totalPages}
+              aria-label="Next page"
             >
               <IoIosArrowForward size={20} />
             </button>
@@ -195,88 +199,89 @@ function AllProducts() {
       </div>
 
       {/* Modal */}
-     {isModalOpen && selectedProduct && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-    <div className="relative w-11/12 max-w-3xl p-6 bg-white shadow-xl rounded-2xl">
-      {/* Close button */}
-      <button
-        onClick={() => setIsModalOpen(false)}
-        className="absolute text-gray-500 top-4 right-4 hover:text-black"
-      >
-        ✕
-      </button>
+      {isModalOpen && selectedProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="relative w-11/12 max-w-3xl p-6 bg-white shadow-xl rounded-2xl">
+            {/* Close button */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute text-gray-500 top-4 right-4 hover:text-black"
+              aria-label="Close"
+            >
+              ✕
+            </button>
 
-      {/* Header */}
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-[#101749]">
-          {selectedProduct.name}
-        </h2>
-        {selectedProduct.category?.name && (
-          <span className="inline-block px-3 py-1 mt-2 text-sm text-white rounded-full bg-[#101749]">
-            {selectedProduct.category.name}
-          </span>
-        )}
-      </div>
+            {/* Header */}
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-[#101749]">
+                {selectedProduct.name}
+              </h2>
+              {selectedProduct.category?.name && (
+                <span className="inline-block px-3 py-1 mt-2 text-sm text-white rounded-full bg-[#101749]">
+                  {selectedProduct.category.name}
+                </span>
+              )}
+            </div>
 
-      {/* Description */}
-      {selectedProduct.description && (
-        <p className="px-2 mt-4 overflow-y-auto text-center text-gray-600 max-h-24">
-          {selectedProduct.description}
-        </p>
-      )}
+            {/* Description */}
+            {selectedProduct.description && (
+              <p className="px-2 mt-4 overflow-y-auto text-center text-gray-600 max-h-24">
+                {selectedProduct.description}
+              </p>
+            )}
 
-      {/* Info grid */}
-      <div className="grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2">
-        <p><strong>Price:</strong> {selectedProduct.price != null ? `$${selectedProduct.price}` : "N/A"}</p>
-        <p><strong>Stock:</strong> {selectedProduct.stoke ?? selectedProduct.stock ?? "N/A"}</p>
-        <p><strong>Color:</strong> {selectedProduct.color || "—"}</p>
-        <p><strong>Size:</strong> {selectedProduct.size || "—"}</p>
-        <p><strong>Delivery Options:</strong> 
-          {Array.isArray(selectedProduct.deliveryOption) && selectedProduct.deliveryOption.length > 0 
-            ? selectedProduct.deliveryOption.join(", ") 
-            : "—"}
-        </p>
-        <p><strong>Shipping Charge:</strong> {selectedProduct.shippingCharge != null ? `$${selectedProduct.shippingCharge}` : "—"}</p>
-      </div>
+            {/* Info grid */}
+            <div className="grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2">
+              <p><strong>Price:</strong> {selectedProduct.price != null ? `$${selectedProduct.price}` : "N/A"}</p>
+              <p><strong>Stock:</strong> {selectedProduct.stoke ?? selectedProduct.stock ?? "N/A"}</p>
+              <p><strong>Color:</strong> {selectedProduct.color || "—"}</p>
+              <p><strong>Size:</strong> {selectedProduct.size || "—"}</p>
+              <p><strong>Delivery Options:</strong>
+                {Array.isArray(selectedProduct.deliveryOption) && selectedProduct.deliveryOption.length > 0
+                  ? selectedProduct.deliveryOption.join(", ")
+                  : "—"}
+              </p>
+              <p><strong>Shipping Charge:</strong> {selectedProduct.shippingCharge != null ? `$${selectedProduct.shippingCharge}` : "—"}</p>
+            </div>
 
-      {/* Image gallery */}
-      <div className="mt-6">
-        <h3 className="mb-2 text-lg font-semibold">Product Images</h3>
-        {selectedProduct.images?.length > 0 ? (
-          <div className="flex gap-3 overflow-x-auto">
-            {selectedProduct.images.map((img, i) => (
-              <div
-                key={i}
-                className="flex-shrink-0 w-32 h-32 overflow-hidden bg-gray-100 rounded-lg"
+            {/* Image gallery */}
+            <div className="mt-6">
+              <h3 className="mb-2 text-lg font-semibold">Product Images</h3>
+              {selectedProduct.images?.length > 0 ? (
+                <div className="flex gap-3 overflow-x-auto">
+                  {selectedProduct.images.map((img, i) => (
+                    <div
+                      key={i}
+                      className="flex-shrink-0 w-32 h-32 overflow-hidden bg-gray-100 rounded-lg"
+                    >
+                      <img
+                        src={img}
+                        alt={`Product ${i + 1}`}
+                        className="object-cover w-full h-full transition-transform duration-200 hover:scale-110"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">No images available</p>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-5 py-2 text-white bg-[#101749] rounded-lg hover:bg-[#0c1236] transition"
               >
-                <img
-                  src={img}
-                  alt={`Product ${i + 1}`}
-                  className="object-cover w-full h-full transition-transform duration-200 hover:scale-110"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              </div>
-            ))}
+                Close
+              </button>
+            </div>
           </div>
-        ) : (
-          <p className="text-gray-500">No images available</p>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="flex justify-end mt-6">
-        <button
-          onClick={() => setIsModalOpen(false)}
-          className="px-5 py-2 text-white bg-[#101749] rounded-lg hover:bg-[#0c1236] transition"
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+        </div>
+      )}
     </>
   );
 }

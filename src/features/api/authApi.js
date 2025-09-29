@@ -8,7 +8,7 @@ export const authApi = createApi({
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth.token;
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set("Authorization", token);
       }
       return headers;
     },
@@ -24,7 +24,37 @@ export const authApi = createApi({
         },
       }),
     }),
+
+    getMyProfile: builder.query({
+      query: () => ({
+        url: "/user/get-my-profile",
+        method: "GET",
+      }),
+    }),
+
+    updateProfile: builder.mutation({
+      query: (profileData) => ({
+        url: "/super-admin/update-profile",
+        method: "PATCH",
+        body: profileData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    }),
+       changePassword: builder.mutation({
+      query: (payload) => ({
+        url: "/auth/change-password",
+        method: "POST",
+        body: payload, // { oldPassword, newPassword }
+      }),
+    }),
   }),
 });
 
-export const { useLogInMutation } = authApi;
+export const {
+  useLogInMutation,
+  useGetMyProfileQuery,
+  useUpdateProfileMutation,
+  useChangePasswordMutation
+} = authApi;
