@@ -116,7 +116,7 @@ const SignIn = () => {
               </div>
 
               {/* Submit Button */}
-              <Form.Item className="my-10 text-center">
+              <Form.Item className="mt-5 text-center">
                 <button
                   className="bg-[#101749] p-2 px-10 py-2 font-semibold text-white rounded-md"
                   type="submit"
