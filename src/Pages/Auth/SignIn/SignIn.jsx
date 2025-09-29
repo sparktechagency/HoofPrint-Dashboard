@@ -39,7 +39,6 @@ const SignIn = () => {
         message.error("Login failed, please try again.");
       }
     } catch (err) {
-      // Handle errors from backend or network
       const backendMessage =
         err?.data?.message ??
         err?.error ??

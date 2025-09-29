@@ -140,14 +140,14 @@ function UsersTable() {
                       >
                         <EyeOutlined />
                       </button>
-                      <button
+                      {/* <button
                         onClick={() => handleBlockUser(user)}
                         className="text-[#101749] hover:text-red-400"
                         title="Block"
                         aria-label={`Block ${user.name}`}
                       >
                         <MdBlock size={18} />
-                      </button>
+                      </button> */}
                     </td>
                   </tr>
                 ))

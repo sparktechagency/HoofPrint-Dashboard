@@ -104,14 +104,16 @@ function AllProducts() {
           <table className="w-full">
             <thead className="bg-[#101749]">
               <tr className="text-white">
-                <th className="px-4 py-2 text-left">Color</th>
                 <th className="px-4 py-2 text-left">Serial</th>
-                <th className="px-4 py-2 text-left">Actions</th>
-                <th className="px-4 py-2 text-left">Image</th>
+                     <th className="px-4 py-2 text-left">Image</th>
                 <th className="px-4 py-2 text-left">Name</th>
                 <th className="px-4 py-2 text-left">Price</th>
-                <th className="px-4 py-2 text-left">Stock</th>
+                <th className="px-4 py-2 text-left"> Stock </th>
+                <th className="px-4 py-2 text-left">Color</th>
+           
+                
                 <th className="px-4 py-2 text-left">Category</th>
+                <th className="px-4 py-2 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>

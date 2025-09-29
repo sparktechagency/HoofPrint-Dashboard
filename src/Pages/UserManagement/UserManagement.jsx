@@ -1,4 +1,3 @@
-// src/pages/users/UserManagement.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward, IoMdClose } from "react-icons/io";
 import { MdBlock, MdLockOpen, MdProductionQuantityLimits } from "react-icons/md";
@@ -49,6 +48,7 @@ function UserManagement() {
   const searchInputRef = useRef(null);
 
   const { data, error, isLoading, isFetching } = useGetAllUsersQuery();
+
   const [toggleBlockUser, { isLoading: isBlocking }] =
     useToggleBlockUserMutation();
 
@@ -66,6 +66,7 @@ function UserManagement() {
       avatar: user?.profile_image || userImage,
       totalPurchase: Number(user?.totalPurchase || 0),
       totalSales: Number(user?.totalSales || 0),
+      age: user?.age ? user.age : "Not Provided", // ✅ Added Age
       createdAt: user?.createdAt || "",
       updatedAt: user?.updatedAt || "",
       isBlocked: user?.user?.isBlocked || false,
@@ -176,6 +177,7 @@ function UserManagement() {
                 <th className="px-4 py-3 text-left">Location</th>
                 <th className="px-4 py-3 text-left">Email</th>
                 <th className="px-4 py-3 text-left">Phone</th>
+                <th className="px-4 py-3 text-left">Age</th> {/* ✅ New column */}
                 <th className="px-4 py-3 text-left">Total Purchase</th>
                 <th className="px-4 py-3 text-left">Total Sales</th>
                 <th className="px-4 py-3 text-left">Actions</th>
@@ -186,7 +188,7 @@ function UserManagement() {
                 <tr>
                   <td
                     className="px-4 py-6 text-center text-gray-500"
-                    colSpan={8}
+                    colSpan={9}
                   >
                     Loading users...
                   </td>
@@ -197,7 +199,7 @@ function UserManagement() {
                 <tr>
                   <td
                     className="px-4 py-6 text-center text-gray-500"
-                    colSpan={8}
+                    colSpan={9}
                   >
                     No users found.
                   </td>
@@ -227,6 +229,7 @@ function UserManagement() {
                   <td className="px-4 py-3 text-black">{user.location}</td>
                   <td className="px-4 py-3 text-black">{user.email}</td>
                   <td className="px-4 py-3 text-black">{user.phone}</td>
+                  <td className="px-4 py-3 text-black">{user.age}</td> {/* ✅ */}
                   <td className="px-4 py-3 text-black">{user.totalPurchase}</td>
                   <td className="px-4 py-3 text-black">{user.totalSales}</td>
                   <td className="px-4 py-3 text-black">
