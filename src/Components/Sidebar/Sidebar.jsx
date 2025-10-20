@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { FiUser, FiLogOut } from "react-icons/fi";
-import { BiChevronDown } from "react-icons/bi";
+import { BiChevronDown, BiSolidPurchaseTagAlt } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  MdAddShoppingCart,
   MdDashboard,
   MdOutlineBrandingWatermark,
   MdOutlineCategory,
@@ -44,6 +45,16 @@ const Sidebar = ({ closeDrawer }) => {
       icon: <MdOutlineShoppingCart className="w-5 h-5" />,
       label: "All Products",
       Link: "/all-products",
+    },
+      {
+      icon: <BiSolidPurchaseTagAlt className="w-5 h-5" />,
+      label: "Product For Purchase",
+      Link: "/product-purchase",
+    },
+         {
+      icon: <MdAddShoppingCart className="w-5 h-5" />,
+      label: "Add Product",
+      Link: "/add-admin-product",
     },
     {
       icon: <MdOutlineBrandingWatermark className="w-5 h-5" />,

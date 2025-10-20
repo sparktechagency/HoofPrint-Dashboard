@@ -17,6 +17,8 @@ import UserDetails from "../Pages/UserManagement/UserDetails";
 import Brand from "../Pages/Brand/Brand";
 import Category from "../Pages/Category/Category";
 import UserProductsPage from "../Pages/UserManagement/UserProductsPage";
+import ProductPurchase from "../Pages/ProductPurchase/ProductPurchase";
+import AddProductByAdmin from "../Pages/AddProductByAdmin/AddProductByAdmin";
 
 export const router = createBrowserRouter([
   {
@@ -54,7 +56,7 @@ export const router = createBrowserRouter([
             path: "/user-management",
             element: <UserManagement />,
           },
-                  {
+          {
             path: "/users/:id/products",
             element: <UserProductsPage />,
           },
@@ -65,6 +67,14 @@ export const router = createBrowserRouter([
           {
             path: "/transection-history",
             element: <TransectionHistory />,
+          },
+          {
+            path: "/product-purchase",
+            element: <ProductPurchase />,
+          },
+             {
+            path: "/add-admin-product",
+            element: <AddProductByAdmin />,
           },
           {
             path: "/all-products",
