@@ -53,7 +53,7 @@ const Sidebar = ({ closeDrawer }) => {
     },
          {
       icon: <MdAddShoppingCart className="w-5 h-5" />,
-      label: "Add Product",
+      label: "Hoofprint Product ",
       Link: "/add-admin-product",
     },
     {

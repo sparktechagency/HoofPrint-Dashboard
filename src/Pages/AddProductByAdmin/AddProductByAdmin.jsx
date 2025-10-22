@@ -6,9 +6,13 @@ function AddProductByAdmin() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
+
   const [products, setProducts] = useState([
     {
       id: 1,
+      address: "123 Green Road, Dhaka",
+      phone: "+8801789123456",
+      email: "user1@example.com",
       productName: "iPhone 14 Pro",
       brand: "Apple",
       minPrice: 950,
@@ -17,6 +21,9 @@ function AddProductByAdmin() {
     },
     {
       id: 2,
+      address: "22 North Avenue, Sylhet",
+      phone: "+8801678456789",
+      email: "user2@example.com",
       productName: "Samsung Galaxy S23",
       brand: "Samsung",
       minPrice: 700,
@@ -27,13 +34,14 @@ function AddProductByAdmin() {
 
   const pageSize = 10;
 
-  // Filtered products
+  // 🔍 Filter
   const filteredProducts = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     return products.filter(
       (p) =>
         p.productName.toLowerCase().includes(q) ||
-        p.brand.toLowerCase().includes(q)
+        p.brand.toLowerCase().includes(q) ||
+        p.email.toLowerCase().includes(q)
     );
   }, [products, searchTerm]);
 
@@ -43,13 +51,17 @@ function AddProductByAdmin() {
     currentPage * pageSize
   );
 
-  // Handlers
+  // 🧾 Add / Edit Product
   const handleAddProduct = (e) => {
     e.preventDefault();
     const form = e.target;
     const file = form.image.files[0];
+
     const newProduct = {
       id: editProduct ? editProduct.id : Date.now(),
+      address: form.address.value,
+      phone: form.phone.value,
+      email: form.email.value,
       productName: form.productName.value,
       brand: form.brand.value,
       minPrice: parseFloat(form.minPrice.value),
@@ -70,12 +82,14 @@ function AddProductByAdmin() {
     form.reset();
   };
 
+  // ❌ Delete Product
   const handleDelete = (id) => {
     if (confirm("Are you sure you want to delete this product?")) {
       setProducts((prev) => prev.filter((p) => p.id !== id));
     }
   };
 
+  // ✏️ Edit Product
   const handleEdit = (product) => {
     setEditProduct(product);
     setShowModal(true);
@@ -88,12 +102,12 @@ function AddProductByAdmin() {
 
   return (
     <div className="h-[calc(100vh-80px)] mt-16">
-      {/* Search Bar & Add Button */}
+      {/* 🔍 Search + Add Button */}
       <div className="flex flex-col justify-between gap-3 p-4 sm:flex-row">
         <div className="w-full sm:w-72">
           <input
             type="text"
-            placeholder="Search by product or brand..."
+            placeholder="Search by product, brand, or email..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -113,13 +127,16 @@ function AddProductByAdmin() {
         </button>
       </div>
 
-      {/* Table */}
+      {/* 🧾 Table */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead className="bg-[#101749] text-white">
             <tr>
               <th className="px-4 py-2 text-left">#</th>
               <th className="px-4 py-2 text-left">Image</th>
+              <th className="px-4 py-2 text-left">Address</th>
+              <th className="px-4 py-2 text-left">Phone</th>
+              <th className="px-4 py-2 text-left">Email</th>
               <th className="px-4 py-2 text-left">Product Name</th>
               <th className="px-4 py-2 text-left">Brand</th>
               <th className="px-4 py-2 text-left">Min Price ($)</th>
@@ -131,7 +148,9 @@ function AddProductByAdmin() {
             {currentProducts.length > 0 ? (
               currentProducts.map((p, index) => (
                 <tr key={p.id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-2">{(currentPage - 1) * pageSize + index + 1}</td>
+                  <td className="px-4 py-2">
+                    {(currentPage - 1) * pageSize + index + 1}
+                  </td>
                   <td className="px-4 py-2">
                     {p.image ? (
                       <img
@@ -145,6 +164,9 @@ function AddProductByAdmin() {
                       </div>
                     )}
                   </td>
+                  <td className="px-4 py-2">{p.address}</td>
+                  <td className="px-4 py-2">{p.phone}</td>
+                  <td className="px-4 py-2">{p.email}</td>
                   <td className="px-4 py-2">{p.productName}</td>
                   <td className="px-4 py-2">{p.brand}</td>
                   <td className="px-4 py-2">{p.minPrice}</td>
@@ -169,7 +191,7 @@ function AddProductByAdmin() {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="p-6 text-center text-gray-500">
+                <td colSpan="10" className="p-6 text-center text-gray-500">
                   No products found.
                 </td>
               </tr>
@@ -178,7 +200,7 @@ function AddProductByAdmin() {
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* 📄 Pagination */}
       {filteredProducts.length > 0 && (
         <div className="flex items-center justify-center gap-1 py-4">
           <button
@@ -211,60 +233,61 @@ function AddProductByAdmin() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* 🪟 Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
-            <h2 className="mb-4 text-lg font-semibold text-[#101749]">
+          <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
+            <h2 className="mb-5 text-xl font-semibold text-[#101749] text-center">
               {editProduct ? "Edit Product" : "Add New Product"}
             </h2>
             <form onSubmit={handleAddProduct} className="space-y-3">
-              <input
-                type="text"
-                name="productName"
-                defaultValue={editProduct?.productName || ""}
-                placeholder="Product Name"
-                required
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]"
-              />
-              <input
-                type="text"
-                name="brand"
-                defaultValue={editProduct?.brand || ""}
-                placeholder="Brand"
-                required
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]"
-              />
-              <input
-                type="number"
-                name="minPrice"
-                defaultValue={editProduct?.minPrice || ""}
-                placeholder="Min Price ($)"
-                required
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]"
-              />
-              <input
-                type="number"
-                name="desiredPrice"
-                defaultValue={editProduct?.desiredPrice || ""}
-                placeholder="Desired Price ($)"
-                required
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]"
-              />
-              <input
-                type="file"
-                name="image"
-                accept="image/*"
-                className="w-full"
-              />
-              {editProduct?.image && (
-                <img
-                  src={editProduct.image}
-                  alt="Preview"
-                  className="object-cover w-24 h-24 mt-2 rounded"
+              {[
+                { label: "Address", name: "address", type: "text" },
+                { label: "Phone", name: "phone", type: "text" },
+                { label: "Email", name: "email", type: "email" },
+                { label: "Product Name", name: "productName", type: "text" },
+                { label: "Brand", name: "brand", type: "text" },
+                { label: "Min Price ($)", name: "minPrice", type: "number" },
+                { label: "Desired Price ($)", name: "desiredPrice", type: "number" },
+              ].map((field) => (
+                <div key={field.name} className="flex items-center justify-between gap-3">
+                  <label className="w-1/3 text-sm font-medium text-gray-700">
+                    {field.label}:
+                  </label>
+                  <input
+                    type={field.type}
+                    name={field.name}
+                    defaultValue={editProduct?.[field.name] || ""}
+                    required
+                    className="w-2/3 px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]"
+                  />
+                </div>
+              ))}
+
+              {/* 🖼️ Image Upload */}
+              <div className="flex items-center justify-between gap-3">
+                <label className="w-1/3 text-sm font-medium text-gray-700">
+                  Image:
+                </label>
+                <input
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  className="w-2/3"
                 />
+              </div>
+
+              {editProduct?.image && (
+                <div className="flex justify-end">
+                  <img
+                    src={editProduct.image}
+                    alt="Preview"
+                    className="object-cover w-24 h-24 mt-2 rounded"
+                  />
+                </div>
               )}
-              <div className="flex justify-end gap-2 mt-4">
+
+              <div className="flex justify-end gap-3 mt-6">
                 <button
                   type="button"
                   onClick={() => {
