@@ -8,6 +8,7 @@ import { settingApi } from "./api/settingApi.js";
 import { productApi } from "./api/productApi.js";
 import { dashboardApi } from "./api/dashboardApi.js";
 import { transactionApi } from "./api/transactionApi.js";
+import { hoofPrintApi } from "./api/hoofPrintApi.js";
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     [productApi.reducerPath]:productApi.reducer,
     [dashboardApi.reducerPath]:dashboardApi.reducer,
     [transactionApi.reducerPath]:transactionApi.reducer,
+    [hoofPrintApi.reducerPath]:hoofPrintApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -30,6 +32,7 @@ export const store = configureStore({
       settingApi.middleware,
       productApi.middleware,
       dashboardApi.middleware,
-      transactionApi.middleware
+      transactionApi.middleware,
+      hoofPrintApi.middleware
     ),
 });
