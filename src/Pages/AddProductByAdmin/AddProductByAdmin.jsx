@@ -1,5 +1,9 @@
 import React, { useState, useMemo } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { useCreateProductMutation } from "../../features/api/productApi";
+import { useGetAllCategoriesQuery } from "../../features/api/categoryApi";
+import { useGetAllBrandsQuery } from "../../features/api/brandApi";
+
 
 function AddProductByAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -7,41 +11,32 @@ function AddProductByAdmin() {
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
 
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      address: "123 Green Road, Dhaka",
-      phone: "+8801789123456",
-      email: "user1@example.com",
-      productName: "iPhone 14 Pro",
-      brand: "Apple",
-      minPrice: 950,
-      desiredPrice: 1100,
-      image: null,
-    },
-    {
-      id: 2,
-      address: "22 North Avenue, Sylhet",
-      phone: "+8801678456789",
-      email: "user2@example.com",
-      productName: "Samsung Galaxy S23",
-      brand: "Samsung",
-      minPrice: 700,
-      desiredPrice: 850,
-      image: null,
-    },
-  ]);
+  const [products, setProducts] = useState([]);
+  const [createProduct, { isLoading }] = useCreateProductMutation();
+
+  // 🔹 Fetch brands & categories
+  const { data: brandsData } = useGetAllBrandsQuery();
+  const { data: categoriesData } = useGetAllCategoriesQuery();
+
+
+//   const brands = Array.isArray(brandsData?.data) ? brandsData.data : [];
+// const categories = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
+const brands = Array.isArray(brandsData?.data?.result) ? brandsData.data.result : [];
+const categories = Array.isArray(categoriesData?.data?.result) ? categoriesData.data.result : [];
+
+  // const brands = brandsData?.data || [];
+  // const categories = categoriesData?.data || [];
 
   const pageSize = 10;
 
-  // 🔍 Filter
+  // 🔍 Filter logic
   const filteredProducts = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     return products.filter(
       (p) =>
-        p.productName.toLowerCase().includes(q) ||
-        p.brand.toLowerCase().includes(q) ||
-        p.email.toLowerCase().includes(q)
+        p.name?.toLowerCase().includes(q) ||
+        p.brand?.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q)
     );
   }, [products, searchTerm]);
 
@@ -51,48 +46,53 @@ function AddProductByAdmin() {
     currentPage * pageSize
   );
 
-  // 🧾 Add / Edit Product
-  const handleAddProduct = (e) => {
+  // 🧾 Add Product
+  const handleAddProduct = async (e) => {
     e.preventDefault();
     const form = e.target;
-    const file = form.image.files[0];
+    const formData = new FormData();
 
-    const newProduct = {
-      id: editProduct ? editProduct.id : Date.now(),
-      address: form.address.value,
-      phone: form.phone.value,
-      email: form.email.value,
-      productName: form.productName.value,
-      brand: form.brand.value,
-      minPrice: parseFloat(form.minPrice.value),
-      desiredPrice: parseFloat(form.desiredPrice.value),
-      image: file ? URL.createObjectURL(file) : editProduct?.image || null,
-    };
-
-    if (editProduct) {
-      setProducts((prev) =>
-        prev.map((p) => (p.id === editProduct.id ? newProduct : p))
-      );
-    } else {
-      setProducts((prev) => [...prev, newProduct]);
+    if (form.product_image.files[0]) {
+      formData.append("product_image", form.product_image.files[0]);
     }
 
-    setShowModal(false);
-    setEditProduct(null);
-    form.reset();
+    const data = {
+      name: form.name.value,
+      price: parseFloat(form.price.value),
+      user: "688b38882e1086d902050c57", // static for now
+      stoke: parseInt(form.stoke.value),
+      category: form.category.value,
+      description: form.description.value,
+      color: form.color.value,
+      size: form.size.value,
+      forWhom: form.forWhom.value,
+      gender: form.gender.value,
+      brand: form.brand.value,
+      deliveryOption: Array.from(form.deliveryOption)
+        .filter((opt) => opt.checked)
+        .map((opt) => opt.value),
+      shippingCharge: parseFloat(form.shippingCharge.value),
+      condition: form.condition.value,
+    };
+
+    formData.append("data", JSON.stringify(data));
+
+    try {
+      const res = await createProduct(formData).unwrap();
+      alert("✅ Product created successfully!");
+      console.log(res);
+      setShowModal(false);
+      form.reset();
+    } catch (err) {
+      console.error("❌ Product creation failed:", err);
+      alert("Failed to add product. Please try again.");
+    }
   };
 
-  // ❌ Delete Product
   const handleDelete = (id) => {
     if (confirm("Are you sure you want to delete this product?")) {
       setProducts((prev) => prev.filter((p) => p.id !== id));
     }
-  };
-
-  // ✏️ Edit Product
-  const handleEdit = (product) => {
-    setEditProduct(product);
-    setShowModal(true);
   };
 
   const onPageChange = (page) => {
@@ -107,7 +107,7 @@ function AddProductByAdmin() {
         <div className="w-full sm:w-72">
           <input
             type="text"
-            placeholder="Search by product, brand, or email..."
+            placeholder="Search by product or brand..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -134,13 +134,11 @@ function AddProductByAdmin() {
             <tr>
               <th className="px-4 py-2 text-left">#</th>
               <th className="px-4 py-2 text-left">Image</th>
-              <th className="px-4 py-2 text-left">Address</th>
-              <th className="px-4 py-2 text-left">Phone</th>
-              <th className="px-4 py-2 text-left">Email</th>
-              <th className="px-4 py-2 text-left">Product Name</th>
+              <th className="px-4 py-2 text-left">Name</th>
               <th className="px-4 py-2 text-left">Brand</th>
-              <th className="px-4 py-2 text-left">Min Price ($)</th>
-              <th className="px-4 py-2 text-left">Desired Price ($)</th>
+              <th className="px-4 py-2 text-left">Price</th>
+              <th className="px-4 py-2 text-left">Stock</th>
+              <th className="px-4 py-2 text-left">Category</th>
               <th className="px-4 py-2 text-left">Actions</th>
             </tr>
           </thead>
@@ -155,7 +153,7 @@ function AddProductByAdmin() {
                     {p.image ? (
                       <img
                         src={p.image}
-                        alt={p.productName}
+                        alt={p.name}
                         className="object-cover w-16 h-16 rounded"
                       />
                     ) : (
@@ -164,34 +162,24 @@ function AddProductByAdmin() {
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-2">{p.address}</td>
-                  <td className="px-4 py-2">{p.phone}</td>
-                  <td className="px-4 py-2">{p.email}</td>
-                  <td className="px-4 py-2">{p.productName}</td>
+                  <td className="px-4 py-2">{p.name}</td>
                   <td className="px-4 py-2">{p.brand}</td>
-                  <td className="px-4 py-2">{p.minPrice}</td>
-                  <td className="px-4 py-2">{p.desiredPrice}</td>
+                  <td className="px-4 py-2">${p.price}</td>
+                  <td className="px-4 py-2">{p.stoke}</td>
+                  <td className="px-4 py-2">{p.category}</td>
                   <td className="px-4 py-2">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(p)}
-                        className="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleDelete(p.id)}
+                      className="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="10" className="p-6 text-center text-gray-500">
+                <td colSpan="8" className="p-6 text-center text-gray-500">
                   No products found.
                 </td>
               </tr>
@@ -236,73 +224,126 @@ function AddProductByAdmin() {
       {/* 🪟 Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
+          <div className="w-full max-w-2xl p-6 bg-white rounded-lg shadow-lg overflow-y-auto max-h-[90vh]">
             <h2 className="mb-5 text-xl font-semibold text-[#101749] text-center">
               {editProduct ? "Edit Product" : "Add New Product"}
             </h2>
-            <form onSubmit={handleAddProduct} className="space-y-3">
-              {[
-                { label: "Address", name: "address", type: "text" },
-                { label: "Phone", name: "phone", type: "text" },
-                { label: "Email", name: "email", type: "email" },
-                { label: "Product Name", name: "productName", type: "text" },
-                { label: "Brand", name: "brand", type: "text" },
-                { label: "Min Price ($)", name: "minPrice", type: "number" },
-                { label: "Desired Price ($)", name: "desiredPrice", type: "number" },
-              ].map((field) => (
-                <div key={field.name} className="flex items-center justify-between gap-3">
-                  <label className="w-1/3 text-sm font-medium text-gray-700">
-                    {field.label}:
-                  </label>
-                  <input
-                    type={field.type}
-                    name={field.name}
-                    defaultValue={editProduct?.[field.name] || ""}
-                    required
-                    className="w-2/3 px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]"
-                  />
-                </div>
-              ))}
 
-              {/* 🖼️ Image Upload */}
-              <div className="flex items-center justify-between gap-3">
-                <label className="w-1/3 text-sm font-medium text-gray-700">
-                  Image:
-                </label>
-                <input
-                  type="file"
-                  name="image"
-                  accept="image/*"
-                  className="w-2/3"
-                />
+            <form onSubmit={handleAddProduct} className="space-y-4">
+              {/* 🧾 Text Inputs */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Product Name:</label>
+                  <input type="text" name="name" required className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]" />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Price ($):</label>
+                  <input type="number" name="price" required className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]" />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Stock:</label>
+                  <input type="number" name="stoke" required className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]" />
+                </div>
+
+                {/* 🔽 Category Dropdown */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Category:</label>
+                  <select name="category" required className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]">
+                    <option value="">Select Category</option>
+                    {categories.map((cat) => (
+                      <option key={cat._id} value={cat._id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 🔽 Brand Dropdown */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Brand:</label>
+                  <select name="brand" required className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]">
+                    <option value="">Select Brand</option>
+                    {brands.map((b) => (
+                      <option key={b._id} value={b._id}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Color:</label>
+                  <input type="text" name="color" required className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]" />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Size:</label>
+                  <input type="text" name="size" required className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]" />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">For Whom:</label>
+                  <input type="text" name="forWhom" required className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]" />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Gender:</label>
+                  <input type="text" name="gender" required className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]" />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Condition:</label>
+                  <input type="text" name="condition" required className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]" />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Shipping Charge ($):</label>
+                  <input type="number" name="shippingCharge" required className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]" />
+                </div>
               </div>
 
-              {editProduct?.image && (
-                <div className="flex justify-end">
-                  <img
-                    src={editProduct.image}
-                    alt="Preview"
-                    className="object-cover w-24 h-24 mt-2 rounded"
-                  />
-                </div>
-              )}
+              {/* 📝 Description */}
+              <div>
+                <label className="text-sm font-medium text-gray-700">Description:</label>
+                <textarea name="description" rows="3" className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#101749]" />
+              </div>
 
+              {/* 🚚 Delivery Options */}
+              <div>
+                <label className="text-sm font-medium text-gray-700">Delivery Options:</label>
+                <div className="flex gap-4 mt-2">
+                  <label>
+                    <input type="checkbox" name="deliveryOption" value="Shipping" className="mr-1" /> Shipping
+                  </label>
+                  <label>
+                    <input type="checkbox" name="deliveryOption" value="Pickup" className="mr-1" /> Pickup
+                  </label>
+                </div>
+              </div>
+
+              {/* 🖼️ Image */}
+              <div>
+                <label className="text-sm font-medium text-gray-700">Product Image:</label>
+                <input type="file" name="product_image" accept="image/*" className="w-full" />
+              </div>
+
+              {/* Buttons */}
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setEditProduct(null);
-                  }}
+                  onClick={() => setShowModal(false)}
                   className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-white bg-[#101749] rounded hover:bg-[#0b1035]"
+                  disabled={isLoading}
+                  className="px-4 py-2 text-white bg-[#101749] rounded hover:bg-[#0b1035] disabled:opacity-50"
                 >
-                  {editProduct ? "Update" : "Add"}
+                  {isLoading ? "Adding..." : "Add Product"}
                 </button>
               </div>
             </form>

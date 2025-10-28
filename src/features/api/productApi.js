@@ -24,12 +24,12 @@ export const productApi = createApi({
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth?.token;
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set("Authorization", token);
       }
       return headers;
     },
   }),
-  tagTypes: ["Product"],
+  tagTypes: ["Product", "HoofprintSell"],
   endpoints: (builder) => ({
     // Your original endpoint (kept as-is)
     getAllProducts: builder.query({
@@ -37,21 +37,25 @@ export const productApi = createApi({
       providesTags: ["Product"],
     }),
 
-    // NEW: products for a specific user with optional filters/pagination
-    // Example args:
-    // {
-    //   user: "688b38882e1086d902050c57",  // REQUIRED
-    //   searchTerm, category, brand, size, color,
-    //   minPrice, maxPrice,
-    //   gender,                // Women | Unisex | Men
-    //   isAvailable,           // "true" | "false"  (string to match your API)
-    //   page, limit            // if backend supports pagination
-    // }
     getProductsByUser: builder.query({
       query: (args = {}) => `/product/all-products${buildQuery(args)}`,
-      // Tag by user so you can selectively invalidate if needed later
       providesTags: (result, error, args) =>
-        args?.user ? [{ type: "Product", id: args.user }, "Product"] : ["Product"],
+        args?.user
+          ? [{ type: "Product", id: args.user }, "Product"]
+          : ["Product"],
+    }),
+    // 🆕 New endpoint for hoofprint sells
+    getAllHoofprintSells: builder.query({
+      query: (args = {}) => `/hoofprint-sell/get-all${buildQuery(args)}`,
+      providesTags: ["HoofprintSell"],
+    }),
+    createProduct: builder.mutation({
+      query: (formData) => ({
+        url: "/product/create-product",
+        method: "POST",
+        body: formData, // must be FormData
+      }),
+      invalidatesTags: ["Product"],
     }),
   }),
 });
@@ -59,4 +63,6 @@ export const productApi = createApi({
 export const {
   useGetAllProductsQuery,
   useGetProductsByUserQuery,
+  useGetAllHoofprintSellsQuery,
+  useCreateProductMutation
 } = productApi;
