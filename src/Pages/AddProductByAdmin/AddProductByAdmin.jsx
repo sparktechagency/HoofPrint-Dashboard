@@ -33,7 +33,7 @@ function AddProductByAdmin() {
 
   const brands = Array.isArray(brandsData?.data?.result) ? brandsData.data.result : [];
   const categories = Array.isArray(categoriesData?.data?.result) ? categoriesData.data.result : [];
-  const users = Array.isArray(usersData?.data?.result) ? usersData.data.result : [];
+  // const users = Array.isArray(usersData?.data?.result) ? usersData.data.result : [];
 
   const pageSize = 10;
 
@@ -72,7 +72,7 @@ function AddProductByAdmin() {
     const data = {
       name: form.name.value,
       price: parseFloat(form.price.value),
-      user: form.user.value,
+      // user: form.user.value,
       stoke: parseInt(form.stoke.value),
       category: form.category.value,
       description: form.description.value,
@@ -337,7 +337,7 @@ function AddProductByAdmin() {
                   </select>
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="text-sm font-medium text-gray-700">User:</label>
                   <select
                     name="user"
@@ -354,7 +354,7 @@ function AddProductByAdmin() {
                       </option>
                     ))}
                   </select>
-                </div>
+                </div> */}
 
                 {/* Remaining inputs */}
                 <div>
