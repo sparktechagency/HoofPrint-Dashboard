@@ -44,6 +44,11 @@ export const productApi = createApi({
           ? [{ type: "Product", id: args.user }, "Product"]
           : ["Product"],
     }),
+    getProductsByHoofPrint: builder.query({
+      query: () => "/product/all-products?productFrom=Hoofprint",
+      providesTags: ["Product"], // simple tag for cache invalidation
+    }),
+
     // 🆕 New endpoint for hoofprint sells
     getAllHoofprintSells: builder.query({
       query: (args = {}) => `/hoofprint-sell/get-all${buildQuery(args)}`,
@@ -57,6 +62,24 @@ export const productApi = createApi({
       }),
       invalidatesTags: ["Product"],
     }),
+       // 🆕 Update Product
+    updateProduct: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `/product/update-product/${id}`,
+        method: "PATCH", // usually PUT for updates
+        body: formData,
+      }),
+      invalidatesTags: ["Product"],
+    }),
+
+    // 🆕 Delete Product
+    deleteProduct: builder.mutation({
+      query: (id) => ({
+        url: `/product/delete-product/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Product"],
+    }),
   }),
 });
 
@@ -64,5 +87,8 @@ export const {
   useGetAllProductsQuery,
   useGetProductsByUserQuery,
   useGetAllHoofprintSellsQuery,
-  useCreateProductMutation
+  useCreateProductMutation,
+  useGetProductsByHoofPrintQuery,
+  useUpdateProductMutation,
+  useDeleteProductMutation
 } = productApi;

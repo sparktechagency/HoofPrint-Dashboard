@@ -105,13 +105,11 @@ function AllProducts() {
             <thead className="bg-[#101749]">
               <tr className="text-white">
                 <th className="px-4 py-2 text-left">Serial</th>
-                     <th className="px-4 py-2 text-left">Image</th>
+                <th className="px-4 py-2 text-left">Image</th>
                 <th className="px-4 py-2 text-left">Name</th>
                 <th className="px-4 py-2 text-left">Price</th>
                 <th className="px-4 py-2 text-left"> Stock </th>
                 <th className="px-4 py-2 text-left">Color</th>
-           
-                
                 <th className="px-4 py-2 text-left">Category</th>
                 <th className="px-4 py-2 text-left">Actions</th>
               </tr>
@@ -201,89 +199,76 @@ function AllProducts() {
       </div>
 
       {/* Modal */}
-      {isModalOpen && selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="relative w-11/12 max-w-3xl p-6 bg-white shadow-xl rounded-2xl">
-            {/* Close button */}
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute text-gray-500 top-4 right-4 hover:text-black"
-              aria-label="Close"
-            >
-              ✕
-            </button>
+    {isModalOpen && selectedProduct && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div className="w-full max-w-2xl p-6 bg-white rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
+      {/* Header */}
+      <h2 className="mb-4 text-xl font-semibold text-[#101749] text-center">
+        Product Details
+      </h2>
 
-            {/* Header */}
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-[#101749]">
-                {selectedProduct.name}
-              </h2>
-              {selectedProduct.category?.name && (
-                <span className="inline-block px-3 py-1 mt-2 text-sm text-white rounded-full bg-[#101749]">
-                  {selectedProduct.category.name}
-                </span>
-              )}
-            </div>
-
-            {/* Description */}
-            {selectedProduct.description && (
-              <p className="px-2 mt-4 overflow-y-auto text-center text-gray-600 max-h-24">
-                {selectedProduct.description}
-              </p>
-            )}
-
-            {/* Info grid */}
-            <div className="grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2">
-              <p><strong>Price:</strong> {selectedProduct.price != null ? `$${selectedProduct.price}` : "N/A"}</p>
-              <p><strong>Stock:</strong> {selectedProduct.stoke ?? selectedProduct.stock ?? "N/A"}</p>
-              <p><strong>Color:</strong> {selectedProduct.color || "—"}</p>
-              <p><strong>Size:</strong> {selectedProduct.size || "—"}</p>
-              <p><strong>Delivery Options:</strong>
-                {Array.isArray(selectedProduct.deliveryOption) && selectedProduct.deliveryOption.length > 0
-                  ? selectedProduct.deliveryOption.join(", ")
-                  : "—"}
-              </p>
-              <p><strong>Shipping Charge:</strong> {selectedProduct.shippingCharge != null ? `$${selectedProduct.shippingCharge}` : "—"}</p>
-            </div>
-
-            {/* Image gallery */}
-            <div className="mt-6">
-              <h3 className="mb-2 text-lg font-semibold">Product Images</h3>
-              {selectedProduct.images?.length > 0 ? (
-                <div className="flex gap-3 overflow-x-auto">
-                  {selectedProduct.images.map((img, i) => (
-                    <div
-                      key={i}
-                      className="flex-shrink-0 w-32 h-32 overflow-hidden bg-gray-100 rounded-lg"
-                    >
-                      <img
-                        src={img}
-                        alt={`Product ${i + 1}`}
-                        className="object-cover w-full h-full transition-transform duration-200 hover:scale-110"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500">No images available</p>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-5 py-2 text-white bg-[#101749] rounded-lg hover:bg-[#0c1236] transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+      {/* Info Grid */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <strong>Name:</strong> {selectedProduct.name}
         </div>
-      )}
+        <div>
+          <strong>Price:</strong> {selectedProduct.price != null ? `$${selectedProduct.price}` : "N/A"}
+        </div>
+        <div>
+          <strong>Stock:</strong> {selectedProduct.stoke ?? selectedProduct.stock ?? "N/A"}
+        </div>
+        <div>
+          <strong>Color:</strong> {selectedProduct.color || "N/A"}
+        </div>
+        <div>
+          <strong>Size:</strong> {selectedProduct.size || "N/A"}
+        </div>
+        <div>
+          <strong>Delivery Options:</strong> 
+          {Array.isArray(selectedProduct.deliveryOption) && selectedProduct.deliveryOption.length > 0
+            ? selectedProduct.deliveryOption.join(", ")
+            : "N/A"}
+        </div>
+        <div>
+          <strong>Shipping Charge:</strong> {selectedProduct.shippingCharge != null ? `$${selectedProduct.shippingCharge}` : "N/A"}
+        </div>
+        <div className="md:col-span-2">
+          <strong>Category:</strong> {selectedProduct.category?.name || "N/A"}
+        </div>
+        <div className="md:col-span-2">
+          <strong>Description:</strong> {selectedProduct.description || "N/A"}
+        </div>
+        <div className="md:col-span-2 ">
+          {selectedProduct.images?.length > 0 ? (
+            <img
+              src={selectedProduct.images[0]}
+              alt={selectedProduct.name}
+              className="object-fill w-full overflow-hidden rounded max-h-64"
+            />
+          ) : (
+            <div className="flex items-center justify-center w-full h-64 text-gray-500 bg-gray-200 rounded">
+              No Image
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex justify-end mt-6">
+        <button
+          onClick={() => setIsModalOpen(false)}
+          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+      
     </>
   );
 }
