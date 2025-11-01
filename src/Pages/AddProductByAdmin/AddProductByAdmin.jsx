@@ -60,53 +60,55 @@ function AddProductByAdmin() {
   };
 
   // Handle add or update
-  const handleSubmitProduct = async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData();
+const handleSubmitProduct = async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData();
 
-    if (form.product_image.files[0]) {
-      formData.append("product_image", form.product_image.files[0]);
-    }
+  if (form.product_image.files[0]) {
+    formData.append("product_image", form.product_image.files[0]);
+  }
 
-    const data = {
-      name: form.name.value,
-      price: parseFloat(form.price.value),
-      // user: form.user.value,
-      stoke: parseInt(form.stoke.value),
-      category: form.category.value,
-      description: form.description.value,
-      color: form.color.value,
-      size: form.size.value,
-      forWhom: form.forWhom.value,
-      gender: form.gender.value,
-      brand: form.brand.value,
-      deliveryOption: Array.from(form.deliveryOption)
-        .filter((opt) => opt.checked)
-        .map((opt) => opt.value),
-      shippingCharge: parseFloat(form.shippingCharge.value),
-      condition: form.condition.value,
-      productFrom: "Hoofprint",
-    };
-
-    formData.append("data", JSON.stringify(data));
-
-    try {
-      if (editProduct) {
-        await updateProduct({ id: editProduct._id, formData }).unwrap();
-        message.success("✅ Product updated successfully!");
-      } else {
-        await createProduct(formData).unwrap();
-        message.success("✅ Product created successfully!");
-      }
-      setShowModal(false);
-      setEditProduct(null);
-      form.reset();
-    } catch (err) {
-      message.error("❌ Failed. Please try again.", err);
-    }
+  const data = {
+    name: form.name.value,
+    price: parseFloat(form.price.value),
+    stoke: parseInt(form.stoke.value),
+    category: form.category.value,
+    description: form.description.value,
+    color: form.color.value,
+    size: form.size.value,
+    forWhom: form.forWhom.value,
+    gender: form.gender.value,
+    brand: form.brand.value,
+    deliveryOption: Array.from(form.deliveryOption)
+      .filter((opt) => opt.checked)
+      .map((opt) => opt.value),
+    shippingCharge: parseFloat(form.shippingCharge.value),
+    condition: form.condition.value,
+    productFrom: "Hoofprint",
   };
 
+  formData.append("data", JSON.stringify(data));
+
+  try {
+    if (editProduct) {
+      await updateProduct({ id: editProduct._id, body: formData }).unwrap();
+      await refetch();
+      message.success("✅ Product updated successfully!");
+    } else {
+      await createProduct(formData).unwrap();
+      message.success("✅ Product created successfully!");
+    }
+
+    // ✅ Close modal after success
+    setShowModal(false);
+    setEditProduct(null);
+    form.reset();
+  } catch (err) {
+    console.log(err);
+    message.error("❌ Failed. Please try again.");
+  }
+};
   // Handle edit
   const handleEditProduct = (product) => {
     setEditProduct(product);
@@ -125,7 +127,8 @@ function AddProductByAdmin() {
           await deleteProduct(id).unwrap();
           message.success("✅ Product deleted successfully!");
         } catch (err) {
-          message.error("❌ Failed to delete product.", err);
+          console.log(err)
+          message.error("❌ Failed to delete product.");
         }
       },
     });

@@ -21,7 +21,10 @@ export const productApi = createApi({
   reducerPath: "productApi",
   baseQuery: fetchBaseQuery({
     baseUrl: BASE_URL,
-    prepareHeaders: (headers, { getState }) => {
+    prepareHeaders: (
+      headers,
+      { getState, endpoint, type, extra, forced, meta }
+    ) => {
       const token = getState().auth?.token;
       if (token) {
         headers.set("Authorization", token);
@@ -62,12 +65,12 @@ export const productApi = createApi({
       }),
       invalidatesTags: ["Product"],
     }),
-       // 🆕 Update Product
+    // 🆕 Update Product
     updateProduct: builder.mutation({
       query: ({ id, formData }) => ({
         url: `/product/update-product/${id}`,
-        method: "PATCH", // usually PUT for updates
-        body: formData,
+        method: "PATCH",
+        body: formData, // must be named formData for clarity
       }),
       invalidatesTags: ["Product"],
     }),
@@ -78,8 +81,15 @@ export const productApi = createApi({
         url: `/product/delete-product/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Product"],
     }),
+
+    updateProductStatus: builder.mutation({
+  query: (id) => ({
+    url: `/product/delete-product/${id}`,
+    method: "PATCH",
+  }),
+  invalidatesTags: ["Product"], // Refresh product list after status update
+}),
   }),
 });
 
@@ -90,5 +100,6 @@ export const {
   useCreateProductMutation,
   useGetProductsByHoofPrintQuery,
   useUpdateProductMutation,
-  useDeleteProductMutation
+  useDeleteProductMutation,
+  useUpdateProductStatusMutation,
 } = productApi;

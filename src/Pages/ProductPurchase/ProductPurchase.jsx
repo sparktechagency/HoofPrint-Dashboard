@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { EyeIcon } from "lucide-react";
-import { useGetAllHoofprintSellsQuery } from "../../features/api/productApi";
+import {
+  useGetAllHoofprintSellsQuery,
+  useUpdateProductStatusMutation,
+} from "../../features/api/productApi";
+import { message } from "antd";
 
 function ProductPurchase() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,6 +15,8 @@ function ProductPurchase() {
 
   // ✅ fetch from API
   const { data, error, isLoading } = useGetAllHoofprintSellsQuery();
+  const [updateProductStatus, { isLoading: updating }] =
+    useUpdateProductStatusMutation();
 
   // ✅ Parse data safely
   const requests = useMemo(() => {
@@ -45,9 +51,37 @@ function ProductPurchase() {
   );
 
   // ✅ Handlers
-  const handleAction = (id, action) => {
-    alert(`${action} request ID: ${id}`);
-  };
+  // const handleAction = (id, action) => {
+  //   alert(`${action} request ID: ${id}`);
+  // };
+
+  const handleToggleStatus = async (id) => {
+  try {
+    await updateProductStatus(id).unwrap();
+    message.success("✅ Status updated successfully!");
+
+    // instantly reflect change in UI
+    const updated = requests.map((item) =>
+      item.id === id
+        ? {
+            ...item,
+            status:
+              item.status === "Approved"
+                ? "Rejected"
+                : item.status === "Rejected"
+                ? "Pending"
+                : "Approved",
+          }
+        : item
+    );
+
+    data.data.result = updated;
+  } catch (err) {
+    console.error(err);
+    message.error("❌ Failed to update status");
+  }
+};
+
 
   const onPageChange = (page) => {
     if (page < 1 || page > totalPages) return;
@@ -109,7 +143,7 @@ function ProductPurchase() {
                         req.status === "Pending"
                           ? "bg-yellow-100 text-yellow-700"
                           : req.status === "Approved"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-green-100 text-red-700"
                           : "bg-red-100 text-red-700"
                       }`}
                     >
@@ -119,16 +153,19 @@ function ProductPurchase() {
                   <td className="px-4 py-2">
                     <div className="flex justify-center gap-2">
                       <button
-                        onClick={() => handleAction(req.id, "Approved")}
-                        className="px-2 py-0 text-sm text-white bg-[#101749] rounded hover:bg-[#10195f]"
+                        onClick={() => handleToggleStatus(req.id)}
+                        disabled={updating}
+                        className={`px-3 py-1 text-sm text-white rounded ${
+                          req.status === "Approved"
+                            ? "bg-red-600 hover:bg-red-700"
+                            : "bg-[#101749] hover:bg-[#111847]"
+                        } disabled:opacity-50`}
                       >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => handleAction(req.id, "Rejected")}
-                        className="px-2 py-0 text-sm text-white bg-red-600 rounded hover:bg-red-700"
-                      >
-                        Reject
+                        {updating
+                          ? "Updating..."
+                          : req.status === "Approved"
+                          ? "Set Rejected"
+                          : "Set Approved"}
                       </button>
                       <button
                         onClick={() => setSelectedRequest(req)}
@@ -192,11 +229,21 @@ function ProductPurchase() {
               Seller Information
             </h2>
             <div className="mb-4 space-y-1 text-sm">
-              <p><strong>Name:</strong> {selectedRequest.sellerInfo?.name}</p>
-              <p><strong>Address:</strong> {selectedRequest.sellerInfo?.address}</p>
-              <p><strong>Phone:</strong> {selectedRequest.sellerInfo?.phone}</p>
-              <p><strong>Email:</strong> {selectedRequest.sellerInfo?.email}</p>
-              <p><strong>Status:</strong> {selectedRequest.status}</p>
+              <p>
+                <strong>Name:</strong> {selectedRequest.sellerInfo?.name}
+              </p>
+              <p>
+                <strong>Address:</strong> {selectedRequest.sellerInfo?.address}
+              </p>
+              <p>
+                <strong>Phone:</strong> {selectedRequest.sellerInfo?.phone}
+              </p>
+              <p>
+                <strong>Email:</strong> {selectedRequest.sellerInfo?.email}
+              </p>
+              <p>
+                <strong>Status:</strong> {selectedRequest.status}
+              </p>
               <p>
                 <strong>Created At:</strong>{" "}
                 {new Date(selectedRequest.createdAt).toLocaleString()}
