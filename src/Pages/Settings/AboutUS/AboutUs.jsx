@@ -1,5 +1,5 @@
 import { message } from "antd";
-import { lazy, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useAddAboutUsMutation, useGetAboutUsQuery } from "../../../features/api/settingApi";
 // import JoditEditor from "jodit-react";
 const JoditEditor = lazy(() => import("jodit-react"));
@@ -58,7 +58,8 @@ const AboutUs = () => {
   if (isError) return <div>Error loading About Us.</div>;
 
   return (
-    <div className="container mx-auto">
+   <Suspense fallback={<div>loading...</div>}>
+      <div className="container mx-auto">
       <div className="p-6 mt-5 bg-white rounded-lg md:p-10">
         <h2 className="my-6 text-2xl font-bold">About Us</h2>
         <div>
@@ -80,6 +81,7 @@ const AboutUs = () => {
         </div>
       </div>
     </div>
+   </Suspense>
   );
 };
 

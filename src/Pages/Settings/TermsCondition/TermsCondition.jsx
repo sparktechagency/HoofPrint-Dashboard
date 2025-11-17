@@ -1,4 +1,4 @@
-import { lazy, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 // import JoditEditor from "jodit-react";
 const JoditEditor = lazy(() => import("jodit-react"));
 
@@ -69,7 +69,8 @@ const TermsCondition = () => {
   }
 
   return (
-    <ConfigProvider>
+   <Suspense fallback={<div>loading...</div>}>
+     <ConfigProvider>
       {/* ✅ Needed for message to render */}
       {contextHolder}
 
@@ -100,6 +101,7 @@ const TermsCondition = () => {
         </div>
       </div>
     </ConfigProvider>
+   </Suspense>
   );
 };
 

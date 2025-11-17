@@ -1,4 +1,4 @@
-import { lazy, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 // import JoditEditor from "jodit-react";
 const JoditEditor = lazy(() => import("jodit-react"));
 
@@ -57,7 +57,8 @@ const PrivacyPolicy = () => {
   if (isError) return <div>Error loading privacy policy.</div>;
 
   return (
-    <ConfigProvider>
+  <Suspense fallback={<div>loading...</div>}>
+      <ConfigProvider>
       {contextHolder}
       <div className="container mx-auto">
         <div className="p-6 mt-5 bg-white rounded-lg md:p-10">
@@ -81,6 +82,7 @@ const PrivacyPolicy = () => {
         </div>
       </div>
     </ConfigProvider>
+  </Suspense>
   );
 };
 

@@ -1,24 +1,24 @@
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "../Layout/Main/Main";
-import SignIn from "../Pages/Auth/SignIn/SignIn";
+import AddProductByAdmin from "../Pages/AddProductByAdmin/AddProductByAdmin";
+import ProfilePage from "../Pages/AdminProfile/ProfilePage";
+import AllProduct from "../Pages/AllProduct/AllProduct";
 import ForgatePassword from "../Pages/Auth/ForgatePassword/ForgatePassword";
+import SignIn from "../Pages/Auth/SignIn/SignIn";
+import UpdatePassword from "../Pages/Auth/UpdatePassword/UpdatePassword";
+import VerifyCode from "../Pages/Auth/VerifyCode/VerifyCode";
+import Brand from "../Pages/Brand/Brand";
+import Category from "../Pages/Category/Category";
+import Dashboard from "../Pages/Dashboard/Dashboard";
+import ProductPurchase from "../Pages/ProductPurchase/ProductPurchase";
 import AboutUs from "../Pages/Settings/AboutUS/AboutUs";
 import PrivacyPolicy from "../Pages/Settings/PrivacyPolicy/PrivacyPolicy";
 import TermsCondition from "../Pages/Settings/TermsCondition/TermsCondition";
-import PrivateRoute from "./PrivateRoute";
-import Dashboard from "../Pages/Dashboard/Dashboard";
-import UserManagement from "../Pages/UserManagement/UserManagement";
-import ProfilePage from "../Pages/AdminProfile/ProfilePage";
-import VerifyCode from "../Pages/Auth/VerifyCode/VerifyCode";
 import TransectionHistory from "../Pages/TransectionHistory/TransectionHistory";
-import AllProduct from "../Pages/AllProduct/AllProduct";
-import UpdatePassword from "../Pages/Auth/UpdatePassword/UpdatePassword";
 import UserDetails from "../Pages/UserManagement/UserDetails";
-import Brand from "../Pages/Brand/Brand";
-import Category from "../Pages/Category/Category";
+import UserManagement from "../Pages/UserManagement/UserManagement";
 import UserProductsPage from "../Pages/UserManagement/UserProductsPage";
-import ProductPurchase from "../Pages/ProductPurchase/ProductPurchase";
-import AddProductByAdmin from "../Pages/AddProductByAdmin/AddProductByAdmin";
+import PrivateRoute from "./PrivateRoute";
 
 export const router = createBrowserRouter([
   {
