@@ -1,7 +1,8 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
-import JoditEditor from "jodit-react";
-import { useAddAboutUsMutation, useGetAboutUsQuery } from "../../../features/api/settingApi";
 import { message } from "antd";
+import { lazy, useEffect, useMemo, useRef, useState } from "react";
+import { useAddAboutUsMutation, useGetAboutUsQuery } from "../../../features/api/settingApi";
+// import JoditEditor from "jodit-react";
+const JoditEditor = lazy(() => import("jodit-react"));
 
 const AboutUs = () => {
   const editor = useRef(null);

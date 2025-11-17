@@ -1,9 +1,11 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
-import JoditEditor from "jodit-react";
-import { message, ConfigProvider } from "antd";
+import { lazy, useEffect, useMemo, useRef, useState } from "react";
+// import JoditEditor from "jodit-react";
+const JoditEditor = lazy(() => import("jodit-react"));
+
+import { ConfigProvider, message } from "antd";
 import {
-  useGetPrivacyPolicyQuery,
   useAddPrivacyPolicyMutation,
+  useGetPrivacyPolicyQuery,
 } from "../../../features/api/settingApi";
 
 const PrivacyPolicy = () => {

@@ -1,13 +1,14 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
-import JoditEditor from "jodit-react";
+import { lazy, useEffect, useMemo, useRef, useState } from "react";
+// import JoditEditor from "jodit-react";
+const JoditEditor = lazy(() => import("jodit-react"));
+
+import { ConfigProvider, message } from "antd";
 import { useAddTermsConditionsMutation, useGetTermsConditionsQuery } from "../../../features/api/settingApi";
-import { message, ConfigProvider } from "antd";
 
 const TermsCondition = () => {
   const editor = useRef(null);
   const [content, setContent] = useState("");
   const [placeholder, setPlaceholder] = useState("Start typing...");
-
   const { data, error, isLoading } = useGetTermsConditionsQuery();
   const [addTermsConditions, { isLoading: isSaving, isError, error: saveError, isSuccess }] =
     useAddTermsConditionsMutation();
