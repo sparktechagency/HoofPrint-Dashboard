@@ -2,7 +2,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { BASE_URL } from "../../utils/api";
 
-// Safely build query strings from an args object
 const buildQuery = (params = {}) => {
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
@@ -34,7 +33,6 @@ export const productApi = createApi({
   }),
   tagTypes: ["Product", "HoofprintSell"],
   endpoints: (builder) => ({
-    // Your original endpoint (kept as-is)
     getAllProducts: builder.query({
       query: () => "/product/all-products",
       providesTags: ["Product"],
@@ -49,7 +47,7 @@ export const productApi = createApi({
     }),
     getProductsByHoofPrint: builder.query({
       query: () => "/product/all-products?productFrom=Hoofprint",
-      providesTags: ["Product"], // simple tag for cache invalidation
+      providesTags: ["Product"], 
     }),
 
     // 🆕 New endpoint for hoofprint sells
@@ -70,7 +68,7 @@ export const productApi = createApi({
       query: ({ id, formData }) => ({
         url: `/product/update-product/${id}`,
         method: "PATCH",
-        body: formData, // must be named formData for clarity
+        body: formData, 
       }),
       invalidatesTags: ["Product"],
     }),
@@ -88,7 +86,7 @@ export const productApi = createApi({
     url: `/product/delete-product/${id}`,
     method: "PATCH",
   }),
-  invalidatesTags: ["Product"], // Refresh product list after status update
+  invalidatesTags: ["Product"], 
 }),
   }),
 });
