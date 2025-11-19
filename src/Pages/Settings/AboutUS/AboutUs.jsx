@@ -1,8 +1,8 @@
 import { message } from "antd";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useAddAboutUsMutation, useGetAboutUsQuery } from "../../../features/api/settingApi";
-// import JoditEditor from "jodit-react";
-const JoditEditor = lazy(() => import("jodit-react"));
+import JoditEditor from "jodit-react";
+// const JoditEditor = lazy(() => import("jodit-react"));
 
 const AboutUs = () => {
   const editor = useRef(null);
@@ -69,7 +69,6 @@ const AboutUs = () => {
             config={config}
             tabIndex={1}
             onBlur={(newContent) => setContent(newContent)}
-            onChange={(newContent) => setContent(newContent)}
           />
           <button
             onClick={handleSave}

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-// import JoditEditor from "jodit-react";
-const JoditEditor = lazy(() => import("jodit-react"));
+import JoditEditor from "jodit-react";
+// const JoditEditor = lazy(() => import("jodit-react"));
 
 import { ConfigProvider, message } from "antd";
 import {
