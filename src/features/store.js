@@ -9,6 +9,8 @@ import { productApi } from "./api/productApi.js";
 import { dashboardApi } from "./api/dashboardApi.js";
 import { transactionApi } from "./api/transactionApi.js";
 import { hoofPrintApi } from "./api/hoofPrintApi.js";
+import { colorApi } from "./api/colorApi.js";
+import { publicApi } from "./api/publicApi.js";
 
 export const store = configureStore({
   reducer: {
@@ -16,12 +18,14 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
     [brandApi.reducerPath]: brandApi.reducer,
-    [categoryApi.reducerPath]:categoryApi.reducer,
-    [settingApi.reducerPath]:settingApi.reducer,
-    [productApi.reducerPath]:productApi.reducer,
-    [dashboardApi.reducerPath]:dashboardApi.reducer,
-    [transactionApi.reducerPath]:transactionApi.reducer,
-    [hoofPrintApi.reducerPath]:hoofPrintApi.reducer,
+    [categoryApi.reducerPath]: categoryApi.reducer,
+    [settingApi.reducerPath]: settingApi.reducer,
+    [productApi.reducerPath]: productApi.reducer,
+    [dashboardApi.reducerPath]: dashboardApi.reducer,
+    [transactionApi.reducerPath]: transactionApi.reducer,
+    [hoofPrintApi.reducerPath]: hoofPrintApi.reducer,
+    [colorApi.reducerPath]: colorApi.reducer,
+    [publicApi.reducerPath]: publicApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -33,6 +37,8 @@ export const store = configureStore({
       productApi.middleware,
       dashboardApi.middleware,
       transactionApi.middleware,
-      hoofPrintApi.middleware
+      hoofPrintApi.middleware,
+      colorApi.middleware,
+      publicApi.middleware
     ),
 });

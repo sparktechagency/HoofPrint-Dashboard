@@ -19,6 +19,9 @@ import UserDetails from "../Pages/UserManagement/UserDetails";
 import UserManagement from "../Pages/UserManagement/UserManagement";
 import UserProductsPage from "../Pages/UserManagement/UserProductsPage";
 import PrivateRoute from "./PrivateRoute";
+import GetPrivacyPolicy from "../Pages/Settings/PrivacyPolicy/GetPrivacyPolicy";
+import GetTermsCondition from "../Pages/Settings/TermsCondition/GetTermsCondition";
+import Color from "../Pages/Color/Color";
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +39,14 @@ export const router = createBrowserRouter([
   {
     path: "/update-password",
     element: <UpdatePassword />,
+  },
+  {
+    path: "/settings/get-privacy-policy",
+    element: <GetPrivacyPolicy />,
+  },
+  {
+    path: "/settings/get-terms-condition",
+    element: <GetTermsCondition />,
   },
   {
     element: <PrivateRoute />,
@@ -72,7 +83,7 @@ export const router = createBrowserRouter([
             path: "/product-purchase",
             element: <ProductPurchase />,
           },
-             {
+          {
             path: "/add-admin-product",
             element: <AddProductByAdmin />,
           },
@@ -83,6 +94,10 @@ export const router = createBrowserRouter([
           {
             path: "/brand",
             element: <Brand />,
+          },
+          {
+            path: "/color",
+            element: <Color />,
           },
           {
             path: "/category",
@@ -101,6 +116,7 @@ export const router = createBrowserRouter([
             path: "/settings/terms-condition",
             element: <TermsCondition />,
           },
+
           {
             path: "/settings/profile",
             element: <ProfilePage />,

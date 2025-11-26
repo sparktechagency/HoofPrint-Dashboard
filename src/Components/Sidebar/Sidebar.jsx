@@ -37,6 +37,12 @@ const Sidebar = ({ closeDrawer }) => {
       Link: "/user-management",
     },
     {
+      icon: <FaRegUser className="w-5 h-5" />,
+
+      label: "Color",
+      Link: "/color",
+    },
+    {
       icon: <BsArrowLeftRight className="w-5 h-5" />,
       label: "Transection History",
       Link: "/transection-history",
@@ -46,12 +52,12 @@ const Sidebar = ({ closeDrawer }) => {
       label: "All Products",
       Link: "/all-products",
     },
-      {
+    {
       icon: <BiSolidPurchaseTagAlt className="w-5 h-5" />,
       label: "Product For Purchase",
       Link: "/product-purchase",
     },
-         {
+    {
       icon: <MdAddShoppingCart className="w-5 h-5" />,
       label: "Hoofprint Product ",
       Link: "/add-admin-product",
