@@ -41,11 +41,11 @@ export const router = createBrowserRouter([
     element: <UpdatePassword />,
   },
   {
-    path: "/settings/get-privacy-policy",
+    path: "/privacy-policy",
     element: <GetPrivacyPolicy />,
   },
   {
-    path: "/settings/get-terms-condition",
+    path: "/terms-condition",
     element: <GetTermsCondition />,
   },
   {
