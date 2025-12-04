@@ -11,7 +11,7 @@ function ProductPurchase() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const pageSize = 10;
+  const pageSize = 8;
 
   // ✅ fetch from API
   const { data, error, isLoading } = useGetAllHoofprintSellsQuery();

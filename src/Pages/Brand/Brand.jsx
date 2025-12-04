@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { FaEdit, FaTrash, FaPlus, FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import {
   useGetAllBrandsQuery,
   usePatchBrandMutation,
@@ -20,6 +20,10 @@ function Brand() {
   const [patchBrand] = usePatchBrandMutation();
   const [deleteBrand, { isLoading: isDeleting }] = useDeleteBrandMutation();
   const [createBrand, { isLoading: isCreating }] = useCreateBrandMutation();
+
+  // Pagination
+  const pageSize = 8;
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (data && data.data && Array.isArray(data.data.result)) {
@@ -44,55 +48,53 @@ function Brand() {
     setIsModalOpen(true);
   };
 
- const handleUpdate = async () => {
-  if (!selectedBrand) return;
-  try {
-    const formDataToSend = new FormData();
-    formDataToSend.append("name", formData.name);
-    if (imageFile) {
-      formDataToSend.append("brand_image", imageFile);
+  const handleUpdate = async () => {
+    if (!selectedBrand) return;
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      if (imageFile) {
+        formDataToSend.append("brand_image", imageFile);
+      }
+
+      await patchBrand({ id: selectedBrand._id, formData: formDataToSend }).unwrap();
+
+      setBrands((prev) =>
+        prev.map((b) =>
+          b._id === selectedBrand._id
+            ? { ...b, name: formData.name, brand_image: formData.image }
+            : b
+        )
+      );
+      setIsModalOpen(false);
+      setImageFile(null);
+    } catch (err) {
+      console.error("Failed to update brand:", err);
     }
-
-    await patchBrand({ id: selectedBrand._id, formData: formDataToSend }).unwrap();
-
-
-    setBrands((prev) =>
-      prev.map((b) =>
-        b._id === selectedBrand._id
-          ? { ...b, name: formData.name, brand_image: formData.image }
-          : b
-      )
-    );
-    setIsModalOpen(false);
-    setImageFile(null);
-  } catch (err) {
-    console.error("Failed to update brand:", err);
-  }
-};
+  };
 
   const handleCreate = async () => {
-  try {
-    const formDataToSend = new FormData();
-    formDataToSend.append("name", formData.name);
-    if (imageFile) {
-      formDataToSend.append("brand_image", imageFile);
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      if (imageFile) {
+        formDataToSend.append("brand_image", imageFile);
+      }
+
+      const newBrand = await createBrand(formDataToSend).unwrap();
+
+      const createdBrand = newBrand.data || newBrand.result || newBrand;
+
+      setBrands((prev) => [...prev, createdBrand]);
+      setIsModalOpen(false);
+      setImageFile(null);
+    } catch (err) {
+      console.error("Failed to create brand:", err);
+      alert("Failed to create brand. Please try again.");
     }
-
-    const newBrand = await createBrand(formDataToSend).unwrap();
-
-    const createdBrand = newBrand.data || newBrand.result || newBrand;
-
-    setBrands((prev) => [...prev, createdBrand]);
-    setIsModalOpen(false);
-    setImageFile(null);
-  } catch (err) {
-    console.error("Failed to create brand:", err);
-    alert("Failed to create brand. Please try again.");
-  }
-};
+  };
 
   const handleDelete = async (brand) => {
-
     try {
       await deleteBrand(brand._id).unwrap();
       setBrands((prev) => prev.filter((b) => b._id !== brand._id));
@@ -103,13 +105,23 @@ function Brand() {
   };
 
   const handleImageChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    setImageFile(file); 
-    setFormData({ ...formData, image: URL.createObjectURL(file) }); 
-  }
-};
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setFormData({ ...formData, image: URL.createObjectURL(file) });
+    }
+  };
 
+  // Pagination Logic
+  const indexOfLastBrand = currentPage * pageSize;
+  const indexOfFirstBrand = indexOfLastBrand - pageSize;
+  const currentBrands = brands.slice(indexOfFirstBrand, indexOfLastBrand);
+  const totalPages = Math.max(1, Math.ceil(brands.length / pageSize));
+
+  const onPageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
 
   if (isLoading) return <p className="mt-16">Loading brands...</p>;
   if (error) return <p className="mt-16 text-red-500">Failed to load brands</p>;
@@ -136,7 +148,7 @@ function Brand() {
             </tr>
           </thead>
           <tbody>
-            {brands.map((brand, index) => (
+            {currentBrands.map((brand, index) => (
               <tr key={brand._id} className="border-b">
                 <td className="px-4 py-3 text-black">{index + 1}</td>
                 <td className="px-4 py-3 text-black">{brand.name}</td>
@@ -167,6 +179,42 @@ function Brand() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {brands.length > 0 && (
+        <div className="flex items-center justify-center gap-1 py-4">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-40 hover:bg-gray-100"
+            disabled={currentPage === 1}
+            aria-label="Previous page"
+          >
+            <FaArrowLeft size={20} />
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => onPageChange(page)}
+              className={`px-3 py-1 mx-1 rounded-full border ${
+                currentPage === page
+                  ? "text-white bg-[#101749] border-[#101749]"
+                  : "bg-transparent text-black border-transparent hover:bg-gray-100"
+              }`}
+              aria-current={currentPage === page ? "page" : undefined}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-40 hover:bg-gray-100"
+            disabled={currentPage === totalPages}
+            aria-label="Next page"
+          >
+            <FaArrowRight size={20} />
+          </button>
+        </div>
+      )}
 
       {/* Modal for Create/Edit Brand */}
       {isModalOpen && (

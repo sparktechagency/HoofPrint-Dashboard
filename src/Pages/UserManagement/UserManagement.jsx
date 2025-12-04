@@ -42,7 +42,7 @@ function UserManagement() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 14;
+  const pageSize = 8;
 
   const navigate = useNavigate();
   const searchInputRef = useRef(null);

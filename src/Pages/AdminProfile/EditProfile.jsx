@@ -2,10 +2,10 @@ import { useState } from "react";
 
 function EditProfile() {
     const [userData, setUserData] = useState({
-          name:"Md. Mehedi Hasan",
-          email:"mdmehedihasan@gmail.com",
-          number:"01712345678",
-          address:"79/A Joker Vila, Gotham City"
+          // name:"Md. Mehedi Hasan",
+          // email:"mdmehedihasan@gmail.com",
+          // number:"01712345678",
+          // address:"79/A Joker Vila, Gotham City"
         });
   return (
     <div>
@@ -21,7 +21,7 @@ function EditProfile() {
             type="text"
             name="fullName"
             value={userData.name}
-            className="w-full px-5 py-3  border-2  border-black    rounded-md outline-none placeholder:text-xl"
+            className="w-full px-5 py-3 border-2 border-black rounded-md outline-none placeholder:text-xl"
             placeholder="Enter full name"
             required
           />
@@ -33,7 +33,7 @@ function EditProfile() {
             type="email"
             name="email"
             value={userData.email}
-            className="w-full px-5 py-3 mt-5  border-2 border-black  rounded-md placeholder:text-xl"
+            className="w-full px-5 py-3 mt-5 border-2 border-black rounded-md placeholder:text-xl"
             placeholder="Enter Email"
             required
           />
@@ -47,7 +47,7 @@ function EditProfile() {
             type="number"
             value={userData.number}
             name="number"
-            className="w-full px-5 py-3 mt-5   border-2  border-black    rounded-md placeholder:text-xl"
+            className="w-full px-5 py-3 mt-5 border-2 border-black rounded-md placeholder:text-xl"
             placeholder="Contact No"
             required
           />
@@ -60,7 +60,7 @@ function EditProfile() {
             type="text"
             name="location"
             value={userData.address}
-            className="w-full px-5 py-3 mt-5   border-2  border-black   rounded-md placeholder:text-xl"
+            className="w-full px-5 py-3 mt-5 border-2 border-black rounded-md placeholder:text-xl"
             placeholder="Enter Address"
             required
           />

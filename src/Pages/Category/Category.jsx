@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import {
   useCreateCategoryMutation,
   useDeleteCategoryMutation,
@@ -24,6 +24,9 @@ function Category() {
   const [patchCategory] = usePatchCategoryMutation();
   const [deleteCategory] = useDeleteCategoryMutation();
   const [createCategory] = useCreateCategoryMutation();
+
+  const pageSize = 8;
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (data && data.data && Array.isArray(data.data.result)) {
@@ -136,6 +139,16 @@ function Category() {
     return categories.filter((c) => (c?.name || "").toLowerCase().includes(term));
   }, [categories, searchTerm]);
 
+  const indexOfLastCategory = currentPage * pageSize;
+  const indexOfFirstCategory = indexOfLastCategory - pageSize;
+  const currentCategories = filteredCategories.slice(indexOfFirstCategory, indexOfLastCategory);
+  const totalPages = Math.max(1, Math.ceil(filteredCategories.length / pageSize));
+
+  const onPageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
   if (isLoading) return <p className="mt-16">Loading categories...</p>;
   if (error) return <p className="mt-16 text-red-500">Failed to load categories</p>;
 
@@ -174,7 +187,7 @@ function Category() {
             </tr>
           </thead>
           <tbody>
-            {filteredCategories.map((category, index) => (
+            {currentCategories.map((category, index) => (
               <tr key={category._id} className="border-b">
                 <td className="px-4 py-3 text-black">{index + 1}</td>
                 <td className="px-4 py-3 text-black">{category.name}</td>
@@ -214,6 +227,42 @@ function Category() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {filteredCategories.length > 0 && (
+        <div className="flex items-center justify-center gap-1 py-4">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-40 hover:bg-gray-100"
+            disabled={currentPage === 1}
+            aria-label="Previous page"
+          >
+            <FaArrowLeft size={20} />
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => onPageChange(page)}
+              className={`px-3 py-1 mx-1 rounded-full border ${
+                currentPage === page
+                  ? "text-white bg-[#101749] border-[#101749]"
+                  : "bg-transparent text-black border-transparent hover:bg-gray-100"
+              }`}
+              aria-current={currentPage === page ? "page" : undefined}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            className="px-3 py-1 mx-1 text-black rounded-full disabled:opacity-40 hover:bg-gray-100"
+            disabled={currentPage === totalPages}
+            aria-label="Next page"
+          >
+            <FaArrowRight size={20} />
+          </button>
+        </div>
+      )}
 
       {/* Modal for Create/Edit Category */}
       {isModalOpen && (

@@ -117,12 +117,12 @@ function ProfilePage() {
           {activeTab === "changePassword" && (
             <div className="flex items-center justify-center gap-5 my-5 font-semibold text-md md:text-xl">
               <p
-                onClick={() => setActiveTab("editProfile")}
-                className={`cursor-pointer pb-1 ${
-                  activeTab === "profile" ? " border-b-2  border-[#101749]" : "text-[#101749]"
+                onClick={() => setActiveTab("profile")}
+                className={`cursor-pointer pb-1  ${
+                  activeTab === "profile" ? " border-b-2 border-[#101749] " : "text-[#101749]"
                 }`}
               >
-                Edit Profile
+                Profile
               </p>
               <p
                 onClick={() => setActiveTab("changePassword")}

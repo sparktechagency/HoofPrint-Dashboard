@@ -11,7 +11,7 @@ function AllProducts() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 14;
+  const pageSize = 8;
 
   const { data, isLoading, isError, error } = useGetAllProductsQuery();
 

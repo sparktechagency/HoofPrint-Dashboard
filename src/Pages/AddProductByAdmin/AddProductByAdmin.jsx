@@ -35,7 +35,7 @@ function AddProductByAdmin() {
   const categories = Array.isArray(categoriesData?.data?.result) ? categoriesData.data.result : [];
   // const users = Array.isArray(usersData?.data?.result) ? usersData.data.result : [];
 
-  const pageSize = 10;
+  const pageSize = 8;
 
   // Filtered products
   const filteredProducts = useMemo(() => {
