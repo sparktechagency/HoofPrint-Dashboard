@@ -272,6 +272,22 @@ function UserManagement() {
           </table>
         </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         {/* Pagination */}
         {filteredUsers.length > 0 && (
           <div className="flex items-center justify-center gap-1 py-4">
@@ -308,6 +324,119 @@ function UserManagement() {
           </div>
         )}
       </div>
+
+
+{/*=================================== user details=============================== */}
+
+{/* ===== User Details Modal ===== */}
+{isModalOpen && selectedUser && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="w-full max-w-md p-4 overflow-hidden bg-white rounded-md">
+      <div className="relative">
+        <button
+          onClick={() => setIsModalOpen(false)}
+          className="absolute p-1 rounded-full right-2 top-2 hover:bg-gray-100"
+          aria-label="Close"
+        >
+          <IoMdClose />
+        </button>
+
+        <div className="bg-[#101749] p-6 text-center rounded-md">
+          <div className="w-24 h-24 mx-auto mb-4 overflow-hidden border-4 border-white rounded-full">
+            <img
+              src={selectedUser.avatar || userImage}
+              onError={(e) => {
+                e.currentTarget.src = userImage;
+              }}
+              className="object-cover w-full h-full"
+              alt={selectedUser.name}
+            />
+          </div>
+          <h2 className="text-xl font-bold text-white">{selectedUser.name}</h2>
+        </div>
+
+        <div className="p-6">
+          <div className="flex flex-col gap-4 text-sm">
+            <div className="flex justify-between">
+              <div className="w-2/3">
+                <h3 className="font-bold text-black">Email</h3>
+                <p className="text-gray-700">{selectedUser.email || "—"}</p>
+              </div>
+              <div className="w-1/3">
+                <h3 className="font-bold text-black">Phone</h3>
+                <p className="text-gray-700">{selectedUser.phone || "—"}</p>
+              </div>
+            </div>
+
+            <div className="flex justify-between">
+              <div className="w-2/3">
+                <h3 className="font-bold text-black">Date Joined</h3>
+                <p className="text-gray-700">{fmtDateTime(selectedUser.createdAt)}</p>
+              </div>
+              <div className="w-1/3">
+                <h3 className="font-bold text-black">Location</h3>
+                <p className="text-gray-700">{selectedUser.location || "—"}</p>
+              </div>
+            </div>
+          </div>
+
+          {(Number.isFinite(selectedUser.totalPurchase) ||
+            Number.isFinite(selectedUser.totalSales)) && (
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="p-3 rounded-md bg-gray-50">
+                <div className="text-xs text-gray-500">Total Purchase</div>
+                <div className="text-lg font-semibold">
+                  {selectedUser.totalPurchase}
+                </div>
+              </div>
+              <div className="p-3 rounded-md bg-gray-50">
+                <div className="text-xs text-gray-500">Total Sales</div>
+                <div className="text-lg font-semibold">
+                  {selectedUser.totalSales}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="px-4 py-2 text-white bg-[#101749] rounded-md"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       {/* ===== Block/Unblock modal ===== */}
       {isModalBlock && selectedUser && (
