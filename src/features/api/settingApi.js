@@ -14,7 +14,6 @@ export const settingApi = createApi({
     },
   }),
   endpoints: (builder) => ({
-    // 🔹 Terms & Conditions endpoints
     getTermsConditions: builder.query({
       query: () => '/manage/get-terms-conditions',
     }),
@@ -26,7 +25,6 @@ export const settingApi = createApi({
       }),
     }),
 
-    // 🔹 Privacy Policy endpoints
     getPrivacyPolicy: builder.query({
       query: () => '/manage/get-privacy-policy',
     }),

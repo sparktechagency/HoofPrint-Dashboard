@@ -29,7 +29,7 @@ export default function TransectionHistory() {
 
   // pagination
   const [page, setPage] = useState(1);
-  const limit = 14;
+  const limit = 8;
 
   // Build args: only include dates if user applied filter
   const queryArgs = useMemo(() => {
