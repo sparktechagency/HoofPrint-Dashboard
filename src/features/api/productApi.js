@@ -33,10 +33,15 @@ export const productApi = createApi({
   }),
   tagTypes: ["Product", "HoofprintSell"],
   endpoints: (builder) => ({
+    // getAllProducts: builder.query({
+    //   query: () => "/product/all-products",
+    //   providesTags: ["Product"],
+    // }),
+
     getAllProducts: builder.query({
-      query: () => "/product/all-products",
-      providesTags: ["Product"],
-    }),
+  query: (args = {}) => `/product/all-products${buildQuery(args)}`,
+  providesTags: ["Product"],
+}),
 
     getProductsByUser: builder.query({
       query: (args = {}) => `/product/all-products${buildQuery(args)}`,

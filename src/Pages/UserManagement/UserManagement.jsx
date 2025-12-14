@@ -47,7 +47,10 @@ function UserManagement() {
   const navigate = useNavigate();
   const searchInputRef = useRef(null);
 
-  const { data, error, isLoading, isFetching } = useGetAllUsersQuery();
+  // const { data, error, isLoading, isFetching } = useGetAllUsersQuery();
+  const { data, error, isLoading, isFetching } =
+  useGetAllUsersQuery({ page: 1, limit: 1000 });
+
 
   const [toggleBlockUser, { isLoading: isBlocking }] =
     useToggleBlockUserMutation();
@@ -73,9 +76,16 @@ function UserManagement() {
       raw: user,
     }));
 
+  // useEffect(() => {
+  //   setFilteredUsers(normalize(apiUsers));
+  // }, [apiUsers]);
+
   useEffect(() => {
-    setFilteredUsers(normalize(apiUsers));
-  }, [apiUsers]);
+  const normalized = normalize(apiUsers);
+  setFilteredUsers(normalized);
+  setCurrentPage(1); 
+}, [apiUsers]);
+
 
   // debounced search
   const runSearch = useMemo(
@@ -411,32 +421,6 @@ function UserManagement() {
     </div>
   </div>
 )}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
       {/* ===== Block/Unblock modal ===== */}
       {isModalBlock && selectedUser && (

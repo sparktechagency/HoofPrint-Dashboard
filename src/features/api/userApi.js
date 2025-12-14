@@ -15,24 +15,22 @@ export const userApi = createApi({
   }),
   endpoints: (builder) => ({
     getAllUsers: builder.query({
-      query: () => `/normal-user/get-all-user`,
-       providesTags: ["Users"],
+      query: ({ page = 1, limit = 1000 } = {}) =>
+        `/normal-user/get-all-user?page=${page}&limit=${limit}`,
+      providesTags: ["Users"],
     }),
 
-    // 👇 new mutation for block/unblock
     toggleBlockUser: builder.mutation({
       query: (userId) => ({
         url: `/user/block-unblock/${userId}`,
         method: "PATCH",
       }),
-      // refresh users after block/unblock
       invalidatesTags: ["Users"],
     }),
-
-
-
-
   }),
 });
 
-export const { useGetAllUsersQuery,useToggleBlockUserMutation } = userApi;
+export const {
+  useGetAllUsersQuery,
+  useToggleBlockUserMutation,
+} = userApi;

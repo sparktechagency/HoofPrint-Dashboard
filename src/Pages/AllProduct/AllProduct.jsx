@@ -13,7 +13,10 @@ function AllProducts() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
 
-  const { data, isLoading, isError, error } = useGetAllProductsQuery();
+  // const { data, isLoading, isError, error } = useGetAllProductsQuery();
+  const { data, isLoading, isError, error } =
+  useGetAllProductsQuery({ page: 1, limit: 1000 });
+
 
   // products are inside data.data.result; always compute via useMemo (still a hook!)
   const products = useMemo(
