@@ -23,16 +23,23 @@ function AddProductByAdmin() {
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
 
-  const { data: productsData, isLoading: productsLoading } = useGetProductsByHoofPrintQuery();
+  const { data: productsData, isLoading: productsLoading } =
+    useGetProductsByHoofPrintQuery();
 
-  const products = Array.isArray(productsData?.data?.result) ? productsData.data.result : [];
+  const products = Array.isArray(productsData?.data?.result)
+    ? productsData.data.result
+    : [];
 
   const { data: brandsData } = useGetAllBrandsQuery();
   const { data: categoriesData } = useGetAllCategoriesQuery();
-  const { data: usersData } = useGetAllUsersQuery();
+  // const { data: usersData } = useGetAllUsersQuery();
 
-  const brands = Array.isArray(brandsData?.data?.result) ? brandsData.data.result : [];
-  const categories = Array.isArray(categoriesData?.data?.result) ? categoriesData.data.result : [];
+  const brands = Array.isArray(brandsData?.data?.result)
+    ? brandsData.data.result
+    : [];
+  const categories = Array.isArray(categoriesData?.data?.result)
+    ? categoriesData.data.result
+    : [];
   // const users = Array.isArray(usersData?.data?.result) ? usersData.data.result : [];
 
   const pageSize = 8;
@@ -60,55 +67,59 @@ function AddProductByAdmin() {
   };
 
   // Handle add or update
-const handleSubmitProduct = async (e) => {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData();
+  const handleSubmitProduct = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData();
 
-  if (form.product_image.files[0]) {
-    formData.append("product_image", form.product_image.files[0]);
-  }
-
-  const data = {
-    name: form.name.value,
-    price: parseFloat(form.price.value),
-    stoke: parseInt(form.stoke.value),
-    category: form.category.value,
-    description: form.description.value,
-    color: form.color.value,
-    size: form.size.value,
-    forWhom: form.forWhom.value,
-    gender: form.gender.value,
-    brand: form.brand.value,
-    deliveryOption: Array.from(form.deliveryOption)
-      .filter((opt) => opt.checked)
-      .map((opt) => opt.value),
-    shippingCharge: parseFloat(form.shippingCharge.value),
-    condition: form.condition.value,
-    productFrom: "Hoofprint",
-  };
-
-  formData.append("data", JSON.stringify(data));
-
-  try {
-    if (editProduct) {
-      await updateProduct({ id: editProduct._id, body: formData }).unwrap();
-      await refetch();
-      message.success("✅ Product updated successfully!");
-    } else {
-      await createProduct(formData).unwrap();
-      message.success("✅ Product created successfully!");
+    if (form.product_image.files[0]) {
+      formData.append("product_image", form.product_image.files[0]);
     }
 
-    // ✅ Close modal after success
-    setShowModal(false);
-    setEditProduct(null);
-    form.reset();
-  } catch (err) {
-    console.log(err);
-    message.error("❌ Failed. Please try again.");
-  }
-};
+    const data = {
+      name: form.name.value,
+      price: parseFloat(form.price.value),
+      stoke: parseInt(form.stoke.value),
+      category: form.category.value,
+      description: form.description.value,
+      color: form.color.value,
+      size: form.size.value,
+      forWhom: form.forWhom.value,
+      gender: form.gender.value,
+      brand: form.brand.value,
+      deliveryOption: Array.from(form.deliveryOption)
+        .filter((opt) => opt.checked)
+        .map((opt) => opt.value),
+      shippingCharge: parseFloat(form.shippingCharge.value),
+      condition: form.condition.value,
+      productFrom: "Hoofprint",
+    };
+
+    formData.append("data", JSON.stringify(data));
+
+    try {
+      if (editProduct) {
+        await updateProduct({
+          id: editProduct._id,
+          formData: formData,
+        }).unwrap();
+
+        await refetch();
+        message.success("✅ Product updated successfully!");
+      } else {
+        await createProduct(formData).unwrap();
+        message.success("✅ Product created successfully!");
+      }
+
+      // ✅ Close modal after success
+      setShowModal(false);
+      setEditProduct(null);
+      form.reset();
+    } catch (err) {
+      console.log(err);
+      message.error("❌ Failed. Please try again.");
+    }
+  };
   // Handle edit
   const handleEditProduct = (product) => {
     setEditProduct(product);
@@ -116,23 +127,34 @@ const handleSubmitProduct = async (e) => {
   };
 
   // Handle delete
-  const handleDeleteProduct = (id) => {
-    Modal.confirm({
-      title: "Are you sure you want to delete this product?",
-      okText: "Yes",
-      okType: "danger",
-      cancelText: "No",
-      onOk: async () => {
-        try {
-          await deleteProduct(id).unwrap();
-          message.success("✅ Product deleted successfully!");
-        } catch (err) {
-          console.log(err)
-          message.error("❌ Failed to delete product.");
-        }
-      },
-    });
-  };
+ const handleDeleteProduct = async (id) => {
+  if (!id) {
+    message.error("Invalid product ID");
+    return;
+  }
+
+  try {
+    await deleteProduct(id).unwrap();
+    message.success("✅ Product deleted successfully!");
+  } catch (err) {
+    console.error(err);
+    message.error(err?.data?.message || "❌ Failed to delete product.");
+  }
+};
+
+// const handleDeleteProduct = async (id) => {
+//   try {
+//     console.log("Deleting product ID:", id); // check id
+//     await deleteProduct(id).unwrap();
+//     message.success("✅ Product deleted successfully!");
+//   } catch (err) {
+//     console.error(err);
+//     message.error(err?.data?.message || "❌ Failed to delete product.");
+//   }
+// };
+
+
+
 
   return (
     <div className="h-[calc(100vh-80px)] mt-16">
@@ -186,7 +208,9 @@ const handleSubmitProduct = async (e) => {
             ) : currentProducts.length > 0 ? (
               currentProducts.map((p, index) => (
                 <tr key={p._id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-2">{(currentPage - 1) * pageSize + index + 1}</td>
+                  <td className="px-4 py-2">
+                    {(currentPage - 1) * pageSize + index + 1}
+                  </td>
 
                   <td className="px-4 py-2">
                     {Array.isArray(p.images) && p.images.length > 0 ? (
@@ -210,13 +234,27 @@ const handleSubmitProduct = async (e) => {
 
                   <td className="px-4 py-2">{p.name}</td>
                   <td className="px-4 py-2">${p.price}</td>
-                  <td className="px-4 py-2">{p.stoke}</td>
+                  {/* <td className="px-4 py-2">{p.stoke} || "0" </td> */}
+                  <td className="px-4 py-2">{p.stoke ?? 0}</td>
+
                   <td className="px-4 py-2">{p.color || "N/A"}</td>
                   <td className="px-4 py-2">{p.category?.name || "N/A"}</td>
                   <td className="flex gap-2 px-4 py-2">
-                    <EyeIcon size={20} className="cursor-pointer" onClick={() => setViewProduct(p)} />
-                    <Edit2 size={20} className="cursor-pointer" onClick={() => handleEditProduct(p)} />
-                    <Trash2 size={20} className="text-red-500 cursor-pointer" onClick={() => handleDeleteProduct(p._id)} />
+                    <EyeIcon
+                      size={20}
+                      className="cursor-pointer"
+                      onClick={() => setViewProduct(p)}
+                    />
+                    <Edit2
+                      size={20}
+                      className="cursor-pointer"
+                      onClick={() => handleEditProduct(p)}
+                    />
+                    <Trash2
+                      size={20}
+                      className="text-red-500 cursor-pointer"
+                      onClick={() => handleDeleteProduct(p._id)}
+                    />
                   </td>
                 </tr>
               ))
@@ -276,7 +314,9 @@ const handleSubmitProduct = async (e) => {
               {/* Inputs (prefill if editing) */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Product Name:</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Product Name:
+                  </label>
                   <input
                     type="text"
                     name="name"
@@ -286,7 +326,9 @@ const handleSubmitProduct = async (e) => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Price ($):</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Price ($):
+                  </label>
                   <input
                     type="number"
                     name="price"
@@ -296,7 +338,9 @@ const handleSubmitProduct = async (e) => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Stock:</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Stock:
+                  </label>
                   <input
                     type="number"
                     name="stoke"
@@ -307,7 +351,9 @@ const handleSubmitProduct = async (e) => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Category:</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Category:
+                  </label>
                   <select
                     name="category"
                     defaultValue={editProduct?.category?._id || ""}
@@ -324,7 +370,9 @@ const handleSubmitProduct = async (e) => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Brand:</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Brand:
+                  </label>
                   <select
                     name="brand"
                     defaultValue={editProduct?.brand?._id || ""}
@@ -361,7 +409,9 @@ const handleSubmitProduct = async (e) => {
 
                 {/* Remaining inputs */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Color:</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Color:
+                  </label>
                   <input
                     type="text"
                     name="color"
@@ -372,7 +422,9 @@ const handleSubmitProduct = async (e) => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Size:</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Size:
+                  </label>
                   <input
                     type="text"
                     name="size"
@@ -383,7 +435,9 @@ const handleSubmitProduct = async (e) => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">For Whom:</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    For Whom:
+                  </label>
                   <select
                     name="forWhom"
                     defaultValue={editProduct?.forWhom || ""}
@@ -397,7 +451,9 @@ const handleSubmitProduct = async (e) => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Gender:</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Gender:
+                  </label>
                   <select
                     name="gender"
                     defaultValue={editProduct?.gender || ""}
@@ -412,7 +468,9 @@ const handleSubmitProduct = async (e) => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Condition:</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Condition:
+                  </label>
                   <input
                     type="text"
                     name="condition"
@@ -423,7 +481,9 @@ const handleSubmitProduct = async (e) => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Shipping Charge ($):</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Shipping Charge ($):
+                  </label>
                   <input
                     type="number"
                     name="shippingCharge"
@@ -436,7 +496,9 @@ const handleSubmitProduct = async (e) => {
 
               {/* Description */}
               <div>
-                <label className="text-sm font-medium text-gray-700">Description:</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Description:
+                </label>
                 <textarea
                   name="description"
                   rows="3"
@@ -447,14 +509,18 @@ const handleSubmitProduct = async (e) => {
 
               {/* Delivery Options */}
               <div>
-                <label className="text-sm font-medium text-gray-700">Delivery Options:</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Delivery Options:
+                </label>
                 <div className="flex gap-4 mt-2">
                   <label>
                     <input
                       type="checkbox"
                       name="deliveryOption"
                       value="Shipping"
-                      defaultChecked={editProduct?.deliveryOption?.includes("Shipping")}
+                      defaultChecked={editProduct?.deliveryOption?.includes(
+                        "Shipping"
+                      )}
                       className="mr-1"
                     />{" "}
                     Shipping
@@ -464,7 +530,9 @@ const handleSubmitProduct = async (e) => {
                       type="checkbox"
                       name="deliveryOption"
                       value="Pickup"
-                      defaultChecked={editProduct?.deliveryOption?.includes("Pickup")}
+                      defaultChecked={editProduct?.deliveryOption?.includes(
+                        "Pickup"
+                      )}
                       className="mr-1"
                     />{" "}
                     Pickup
@@ -474,7 +542,9 @@ const handleSubmitProduct = async (e) => {
 
               {/* Product Image */}
               <div>
-                <label className="text-sm font-medium text-gray-700">Product Image:</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Product Image:
+                </label>
                 <input
                   type="file"
                   name="product_image"
@@ -529,12 +599,24 @@ const handleSubmitProduct = async (e) => {
               Product Details
             </h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div><strong>Name:</strong> {viewProduct.name}</div>
-              <div><strong>Price:</strong> ${viewProduct.price}</div>
-              <div><strong>Stock:</strong> {viewProduct.stoke}</div>
-              <div><strong>Color:</strong> {viewProduct.color || "N/A"}</div>
-              <div><strong>Category:</strong> {viewProduct.category?.name || "N/A"}</div>
-              <div><strong>Brand:</strong> {viewProduct.brand?.name || "N/A"}</div>
+              <div>
+                <strong>Name:</strong> {viewProduct.name}
+              </div>
+              <div>
+                <strong>Price:</strong> ${viewProduct.price}
+              </div>
+              <div>
+                <strong>Stock:</strong> {viewProduct.stoke}
+              </div>
+              <div>
+                <strong>Color:</strong> {viewProduct.color || "N/A"}
+              </div>
+              <div>
+                <strong>Category:</strong> {viewProduct.category?.name || "N/A"}
+              </div>
+              <div>
+                <strong>Brand:</strong> {viewProduct.brand?.name || "N/A"}
+              </div>
               <div className="md:col-span-2">
                 <strong>Description:</strong> {viewProduct.description || "N/A"}
               </div>

@@ -75,7 +75,9 @@ export const productApi = createApi({
         url: `/product/delete-product/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Product"],
     }),
+
     updateProductStatus: builder.mutation({
       query: ({ id, status }) => ({
         url: `/hoofprint-sell/approve-reject/${id}`,

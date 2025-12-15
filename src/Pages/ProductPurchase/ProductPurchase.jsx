@@ -55,32 +55,6 @@ function ProductPurchase() {
   //   alert(`${action} request ID: ${id}`);
   // };
 
-//   const handleToggleStatus = async (id) => {
-//   try {
-//     await updateProductStatus(id).unwrap();
-//     message.success("✅ Status updated successfully!");
-
-//     // instantly reflect change in UI
-//     const updated = requests.map((item) =>
-//       item.id === id
-//         ? {
-//             ...item,
-//             status:
-//               item.status === "Approved"
-//                 ? "Rejected"
-//                 : item.status === "Rejected"
-//                 ? "Pending"
-//                 : "Approved",
-//           }
-//         : item
-//     );
-
-//     data.data.result = updated;
-//   } catch (err) {
-//     console.error(err);
-//     message.error("❌ Failed to update status");
-//   }
-// };
 
 const handleToggleStatus = async (id, currentStatus) => {
   const nextStatus = currentStatus === "Approved" ? "Rejected" : "Approved";
