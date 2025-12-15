@@ -150,7 +150,7 @@ function Brand() {
           <tbody>
             {currentBrands.map((brand, index) => (
               <tr key={brand._id} className="border-b">
-                <td className="px-4 py-3 text-black">{index + 1}</td>
+                <td className="px-4 py-3 text-black">{(currentPage - 1) * pageSize + index + 1}</td>
                 <td className="px-4 py-3 text-black">{brand.name}</td>
                 <td className="px-4 py-3">
                   <img

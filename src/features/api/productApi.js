@@ -39,9 +39,9 @@ export const productApi = createApi({
     // }),
 
     getAllProducts: builder.query({
-  query: (args = {}) => `/product/all-products${buildQuery(args)}`,
-  providesTags: ["Product"],
-}),
+      query: (args = {}) => `/product/all-products${buildQuery(args)}`,
+      providesTags: ["Product"],
+    }),
 
     getProductsByUser: builder.query({
       query: (args = {}) => `/product/all-products${buildQuery(args)}`,
@@ -51,13 +51,19 @@ export const productApi = createApi({
           : ["Product"],
     }),
     getProductsByHoofPrint: builder.query({
-      query: () => "/product/all-products?productFrom=Hoofprint",
-      providesTags: ["Product"], 
+      // query: () => "/product/all-products?productFrom=Hoofprint",
+      // providesTags: ["Product"],
+       query: ({ page = 1, limit = 1000 } = {}) =>
+        `/product/all-products?page=${page}&limit=${limit}`,
+      providesTags: ["Product"],
     }),
 
     // 🆕 New endpoint for hoofprint sells
     getAllHoofprintSells: builder.query({
-      query: (args = {}) => `/hoofprint-sell/get-all${buildQuery(args)}`,
+      // query: (args = {}) => `/hoofprint-sell/get-all${buildQuery(args)}`,
+      // providesTags: ["HoofprintSell"],
+       query: ({ page = 1, limit = 1000 } = {}) =>
+        `/hoofprint-sell/get-all?page=${page}&limit=${limit}`,
       providesTags: ["HoofprintSell"],
     }),
     createProduct: builder.mutation({
@@ -73,7 +79,7 @@ export const productApi = createApi({
       query: ({ id, formData }) => ({
         url: `/product/update-product/${id}`,
         method: "PATCH",
-        body: formData, 
+        body: formData,
       }),
       invalidatesTags: ["Product"],
     }),
@@ -87,12 +93,12 @@ export const productApi = createApi({
     }),
 
     updateProductStatus: builder.mutation({
-  query: (id) => ({
-    url: `/product/delete-product/${id}`,
-    method: "PATCH",
-  }),
-  invalidatesTags: ["Product"], 
-}),
+      query: (id) => ({
+        url: `/product/delete-product/${id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Product"],
+    }),
   }),
 });
 

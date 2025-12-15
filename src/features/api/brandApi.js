@@ -25,7 +25,8 @@ export const brandApi = createApi({
       invalidatesTags: ["Brand"],
     }),
     getAllBrands: builder.query({
-      query: () => "/brand/all-brands",
+       query: ({ page = 1, limit = 1000 } = {}) =>
+        `/brand/all-brands?page=${page}&limit=${limit}`,
       providesTags: ["Brand"],
     }),
     patchBrand: builder.mutation({

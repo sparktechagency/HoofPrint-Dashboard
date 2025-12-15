@@ -189,7 +189,7 @@ function Category() {
           <tbody>
             {currentCategories.map((category, index) => (
               <tr key={category._id} className="border-b">
-                <td className="px-4 py-3 text-black">{index + 1}</td>
+                <td className="px-4 py-3 text-black"> {(currentPage - 1) * pageSize + index + 1}</td>
                 <td className="px-4 py-3 text-black">{category.name}</td>
                 <td className="px-4 py-3">
                   <img

@@ -5,7 +5,6 @@ import { Eye } from "lucide-react";
 import { useGetAllProductsQuery } from "../../features/api/productApi";
 
 function AllProducts() {
-  // ---- hooks: keep these at the top, unconditionally ----
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");

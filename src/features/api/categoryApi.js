@@ -16,7 +16,8 @@ export const categoryApi = createApi({
   tagTypes: ["Category"],
   endpoints: (builder) => ({
     getAllCategories: builder.query({
-      query: () => "/category/all-categories",
+      query: ({ page = 1, limit = 1000 } = {}) =>
+        `/category/all-categories?page=${page}&limit=${limit}`,
       providesTags: ["Category"],
     }),
     createCategory: builder.mutation({

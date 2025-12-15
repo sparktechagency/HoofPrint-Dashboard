@@ -25,7 +25,10 @@ export const transactionApi = createApi({
   endpoints: (builder) => ({
     getAllTransactions: builder.query({
       // args: { page, limit, startDate?, endDate?, searchTerm? }
-      query: (args = {}) => `/transaction/all-transactions${buildQuery(args)}`,
+      // query: (args = {}) => `/transaction/all-transactions${buildQuery(args)}`,
+      query: ({ page = 1, limit = 1000 } = {}) =>
+        `/transaction/all-transactions?page=${page}&limit=${limit}`,
+      // providesTags: ["Category"],
     }),
   }),
 });
