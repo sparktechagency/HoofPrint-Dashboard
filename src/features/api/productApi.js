@@ -1,4 +1,3 @@
-// src/features/api/productApi.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { BASE_URL } from "../../utils/api";
 
@@ -33,11 +32,6 @@ export const productApi = createApi({
   }),
   tagTypes: ["Product", "HoofprintSell"],
   endpoints: (builder) => ({
-    // getAllProducts: builder.query({
-    //   query: () => "/product/all-products",
-    //   providesTags: ["Product"],
-    // }),
-
     getAllProducts: builder.query({
       query: (args = {}) => `/product/all-products${buildQuery(args)}`,
       providesTags: ["Product"],
@@ -51,18 +45,12 @@ export const productApi = createApi({
           : ["Product"],
     }),
     getProductsByHoofPrint: builder.query({
-      // query: () => "/product/all-products?productFrom=Hoofprint",
-      // providesTags: ["Product"],
-       query: ({ page = 1, limit = 1000 } = {}) =>
+      query: ({ page = 1, limit = 1000 } = {}) =>
         `/product/all-products?page=${page}&limit=${limit}`,
       providesTags: ["Product"],
     }),
-
-    // 🆕 New endpoint for hoofprint sells
     getAllHoofprintSells: builder.query({
-      // query: (args = {}) => `/hoofprint-sell/get-all${buildQuery(args)}`,
-      // providesTags: ["HoofprintSell"],
-       query: ({ page = 1, limit = 1000 } = {}) =>
+      query: ({ page = 1, limit = 1000 } = {}) =>
         `/hoofprint-sell/get-all?page=${page}&limit=${limit}`,
       providesTags: ["HoofprintSell"],
     }),
@@ -70,11 +58,10 @@ export const productApi = createApi({
       query: (formData) => ({
         url: "/product/create-product",
         method: "POST",
-        body: formData, // must be FormData
+        body: formData,
       }),
       invalidatesTags: ["Product"],
     }),
-    // 🆕 Update Product
     updateProduct: builder.mutation({
       query: ({ id, formData }) => ({
         url: `/product/update-product/${id}`,
@@ -83,21 +70,19 @@ export const productApi = createApi({
       }),
       invalidatesTags: ["Product"],
     }),
-
-    // 🆕 Delete Product
     deleteProduct: builder.mutation({
       query: (id) => ({
         url: `/product/delete-product/${id}`,
         method: "DELETE",
       }),
     }),
-
     updateProductStatus: builder.mutation({
-      query: (id) => ({
-        url: `/product/delete-product/${id}`,
+      query: ({ id, status }) => ({
+        url: `/hoofprint-sell/approve-reject/${id}`,
         method: "PATCH",
+        body: { status }, // e.g. "Approved" or "Rejected"
       }),
-      invalidatesTags: ["Product"],
+      invalidatesTags: ["HoofprintSell"],
     }),
   }),
 });
